@@ -1,0 +1,14 @@
+.markdown-description h2,
+.markdown-description h3 {
+    font-weight: bold;
+    margin-top: 1.2rem;
+}
+
+.markdown-description ul {
+    padding-left: 1.2rem;
+    list-style-type: disc;
+}
+
+.markdown-description li {
+    margin-bottom: 0.3rem;
+}

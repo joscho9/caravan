@@ -1,0 +1,278 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  /*background-color: #f8f5e6; !* Helle Cremefarbe *!*/
+  /* oder */
+  /*background-color: #fffcf2; !* Elfenbein *!*/
+  /* oder */
+  /*background-color: #fdfbf7; !* Sanfte Cremefarbe *!*/
+}
+
+header {
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 1em;
+  /* Logo und Navigation Styles */
+}
+
+main {
+  display:flex;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 8px;
+}
+
+.left_main_column{
+  flex-basis: 60%;
+  flex-grow: 0;
+}
+
+nav {
+  /* Breadcrumb Navigation Style */
+  margin-bottom: 1em;
+}
+
+
+aside {
+  width: 25%;
+  margin-left: 5%;
+  /* Sidebar mit Buchungsinformationen Style */
+  border: 1px solid #ccc;
+  padding: 1em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+  color: whitesmoke;
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.img_and_thumbnail_container{
+  display:flex;
+  box-sizing: content-box;
+  max-height:300px;
+}
+
+.main_image_container{
+  flex-basis: 80%;
+  overflow: hidden;
+}
+.main_image_container img{
+  aspect-ratio: 5/3;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.thumbnail_container{
+  display: flex;
+  margin-left: 8px;
+  flex-basis: 20%;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: scroll;
+  flex-grow: 0;
+}
+
+.thumbnail_container img{
+  width: 100%;
+  /*height:100%;*/
+  aspect-ratio: 5/3;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+#right_col_section{
+  flex-basis:30%;
+}
+#left_main_column{
+  flex-basis: 70%;
+}
+
+#caravan-icon{
+  height: 2em;
+  color: white;
+  vertical-align: middle;
+}
+
+.glowing-box{
+  position: relative;
+  margin-left: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
+}
+
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="date"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+}
+
+p {
+  padding: 10px;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.hairline {
+  border-width: 0.1px;
+  border-style: solid;
+  border-color: rgba(51,51,51,0.4);
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#equipment_table{
+  #margin: 10px 0;
+
+}
+#equipment_table td{
+  padding: 5px 5px;
+}
+
+td{
+  padding: 5px;
+}
+
+tr:nth-child(even){
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  background-color: rgba(155, 155, 155, 0.25);
+}
+
+#mein_kalender{
+  display: none;
+  border: 1px solid black;
+  position: absolute;
+  right: 0px;
+  width: 482px;
+  border-radius: 13px;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
+}
+
+.overview-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Ändere von space-around zu center */
+  gap: 1rem;
+  max-width: 1200px; /* Eine sinnvolle maximale Breite festlegen */
+  margin: 0 auto; /* Zentriert den Container selbst */
+  padding: 0 1rem; /* Fügt etwas Abstand an den Seiten hinzu */
+}
+
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 1em;
+  margin-top: 20px;
+}
+
+.caravan-tile {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
+  width: 300px;
+  position: relative;
+  overflow: hidden;
+}
+
+.caravan-tile img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+
+}
+.caravan-tile:hover img{
+  transition: transform 200ms ease;
+  transform: scale(1.01);
+}
+
+.caravan-info {
+  width: 100%;
+  position: absolute;
+  padding: 8px;
+  text-align: center;
+  bottom: 0;
+  backdrop-filter: blur(3px);
+}
+.caravan-info h3 {
+  color:white;
+  margin: 0;
+  font-size: 1.3em;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5); /* Schatten hinzufügen */
+
+}
+button.month-custom[type=button]{
+  color: #007bff;
+  pointer-events: none;
+  margin-right: 8px;
+}
+button.year-custom[type=button]{
+  color: #007bff;
+  pointer-events: none;
+}
+
+.features-section {
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
+  background-color: #f9f9f9;
+  border-left: 4px solid #4caf50;
+  border-radius: 4px;
+}
+
+.features-section h3 {
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.features-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.features-list li {
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 1rem;
+  color: #444;
+}
+
+.features-list li::before {
+  content: "✓";
+  color: #4caf50;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}

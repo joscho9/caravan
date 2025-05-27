@@ -1,0 +1,55 @@
+.header {
+    height: 260px;
+    background-image: url('/images/camping_ambiente.png');
+    background-size: cover;
+    background-position: center 50%; /* Hier steuerst du den Bildausschnitt */
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.header-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* halbtransparentes Overlay */
+    backdrop-filter: blur(6px);     /* Blur-Effekt */
+    -webkit-backdrop-filter: blur(6px); /* Für Safari */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 1rem;
+    color: white;
+}
+
+.header-link {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    text-decoration: none;
+    color: white;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.header-link:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+.header-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.header-subtitle {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
