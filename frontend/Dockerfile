@@ -19,7 +19,3 @@ ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Production-Build erstellen
 RUN echo "Building with API URL: $REACT_APP_API_URL" && npm run build
-
-# Debugging: was ist da tatsächlich?
-RUN echo "Contents of /app after build:" && ls -l /app && \
-    echo "Contents of /app/build:" && ls -l /app/build || echo "Build folder fehlt!"
