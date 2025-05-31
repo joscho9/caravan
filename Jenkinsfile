@@ -38,7 +38,7 @@ pipeline {
         stage('Run Services (Prod)') {
             steps {
                 script {
-                    sh 'docker compose -f docker compose.prod.yml up -d --build'
+                    sh 'docker compose -f docker-compose.prod.yml up -d --build'
                 }
             }
         }
@@ -62,7 +62,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up containers...'
-            sh 'docker compose -f dockercompose.prod.yml down'
+            sh 'docker compose -f docker-compose.prod.yml down'
         }
     }
 }
