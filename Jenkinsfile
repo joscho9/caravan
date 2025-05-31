@@ -35,6 +35,17 @@ pipeline {
             }
         }
 
+        stage('Extract Frontend Build') {
+            steps {
+                script {
+                    def containerId = sh(script: "docker create ${env.FRONTEND_IMAGE}", returnStdout: true).trim()
+                    sh "docker cp ${containerId}:/app/build /var/www/react-caravan"
+                    sh "docker rm ${containerId}"
+                }
+            }
+        }
+
+
         stage('Run Services (Prod)') {
             steps {
                 script {
