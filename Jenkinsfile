@@ -45,10 +45,13 @@ pipeline {
 
         stage('Verify Services') {
             steps {
-                // Hier kannst du z. B. Health Checks hinzufügen
-                echo 'Waiting for backend and frontend to be up...'
-                sleep 20
-                sh 'curl -f http://localhost:8086/actuator/health || true'
+                script {
+                    echo 'Warte auf DB und Backend…'
+                    retry(5) {  // bis zu 5 Versuche
+                        sleep 10
+                        sh 'curl -f http://localhost:8086/actuator/health'
+                    }
+                }
             }
         }
 
@@ -59,10 +62,14 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            echo 'Cleaning up containers...'
+ post {
+        failure {
+            echo 'Fehler beim Deployment – räume auf.'
             sh 'docker compose -f docker-compose.prod.yml down'
+        }
+        success {
+            echo 'Deployment erfolgreich – lasse Container am Leben.'
+            // Hier keine cleanup-Anweisung – Container bleiben aktiv
         }
     }
 }
