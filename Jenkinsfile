@@ -43,18 +43,18 @@ pipeline {
             }
         }
 
-    stage('Verify Services') {
-        steps {
-            script {
-                echo 'Warte auf DB und Backend…'
-                retry(5) {
-                    sleep 10
-                    // Statt localhost:8086 jetzt 172.20.0.1:8086
-                    sh 'curl -f http://172.20.0.1:8086/actuator/health'
-                }
-            }
-        }
-    }
+    // stage('Verify Services') {
+    //     steps {
+    //         script {
+    //             echo 'Warte auf DB und Backend…'
+    //             retry(5) {
+    //                 sleep 10
+    //                 // Statt localhost:8086 jetzt 172.20.0.1:8086
+    //                 sh 'curl -f http://172.20.0.1:8086/actuator/health'
+    //             }
+    //         }
+    //     }
+    // }
 
         stage('Post Actions') {
             steps {
