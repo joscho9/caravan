@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        BACKEND_IMAGE = 'spring-boot-caravan-image'
-        FRONTEND_IMAGE = 'react-caravan-frontend'
         COMPOSE_PROJECT_NAME = 'caravan'
     }
 
@@ -15,57 +13,23 @@ pipeline {
             }
         }
 
-        stage('Build Backend') {
-            steps {
-                dir('backend') {
-                    script {
-                        docker.build(env.BACKEND_IMAGE)
-                    }
-                }
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    script {
-                        docker.build(env.FRONTEND_IMAGE, '.')
-                    }
-                }
-            }
-        }
-
-        stage('Extract Frontend Build') {
+        stage('Build & Deploy') {
             steps {
                 script {
-                    def containerId = sh(script: "docker create ${env.FRONTEND_IMAGE}", returnStdout: true).trim()
-                    sh "docker cp ${containerId}:/app/build /var/www/react-caravan"
-                    sh "docker rm ${containerId}"
+                    // Setze API-URL für das Frontend, wie sie im Compose verwendet wird
+                    def apiUrl = "http://backend:8080/api"
+
+                    // Build-Argumente setzen
+                    sh """
+                        docker compose -f docker-compose.prod.yml build \
+                          --build-arg REACT_APP_API_URL=${apiUrl}
+                    """
+
+                    // Container hochfahren (bzw. neu starten)
+                    sh 'docker compose -f docker-compose.prod.yml up -d'
                 }
             }
         }
-
-
-        stage('Run Services (Prod)') {
-            steps {
-                script {
-                    sh 'docker compose -f docker-compose.prod.yml up -d --build'
-                }
-            }
-        }
-
-    // stage('Verify Services') {
-    //     steps {
-    //         script {
-    //             echo 'Warte auf DB und Backend…'
-    //             retry(5) {
-    //                 sleep 10
-    //                 // Statt localhost:8086 jetzt 172.20.0.1:8086
-    //                 sh 'curl -f http://172.20.0.1:8086/actuator/health'
-    //             }
-    //         }
-    //     }
-    // }
 
         stage('Post Actions') {
             steps {
@@ -74,14 +38,13 @@ pipeline {
         }
     }
 
- post {
+    post {
         failure {
             echo 'Fehler beim Deployment – räume auf.'
-            sh 'docker compose -f docker-compose.prod.yml down'
+            sh 'docker compose -f docker-compose.yml down'
         }
         success {
-            echo 'Deployment erfolgreich – lasse Container am Leben.'
-            // Hier keine cleanup-Anweisung – Container bleiben aktiv
+            echo 'Deployment erfolgreich – Container laufen weiter.'
         }
     }
 }

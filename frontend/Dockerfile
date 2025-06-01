@@ -13,9 +13,25 @@ RUN npm ci --silent
 COPY . .
 
 # Optionaler Build-Parameter für API URL
-# Optional: Setze eine Default-URL, falls keine übergeben wird
 ARG REACT_APP_API_URL=http://localhost:8086/api
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Production-Build erstellen
 RUN echo "Building with API URL: $REACT_APP_API_URL" && npm run build
+
+
+# ---- Production Stage ----
+FROM nginx:alpine
+
+# Entferne Default-Nginx-Seite
+RUN rm -rf /usr/share/nginx/html/*
+
+# Kopiere statischen Build vom vorherigen Stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Eigene Nginx-Konfiguration hinzufügen
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

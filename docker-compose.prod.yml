@@ -1,4 +1,17 @@
 services:
+
+  react-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://backend:8080/api  # WICHTIG: Container-zu-Container muss über Service-Name!
+    ports:
+      - "3080:80"
+    restart: always
+    networks:
+      - caravan-net  # <-- frontend muss im selben Netz sein wie backend!
+
   backend:
     image: spring-boot-caravan-image
     build:
