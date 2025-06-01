@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
+        COMPOSE_FILE = 'docker-compose.prod.yml'
         COMPOSE_PROJECT_NAME = 'caravan'
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -16,17 +16,13 @@ pipeline {
         stage('Build & Deploy') {
             steps {
                 script {
-                    // Setze API-URL für das Frontend, wie sie im Compose verwendet wird
                     def apiUrl = "http://backend:8080/api"
 
-                    // Build-Argumente setzen
                     sh """
-                        docker compose -f docker-compose.prod.yml build \
-                          --build-arg REACT_APP_API_URL=${apiUrl}
+                        docker compose -f ${env.COMPOSE_FILE} build --build-arg REACT_APP_API_URL=${apiUrl}
                     """
 
-                    // Container hochfahren (bzw. neu starten)
-                    sh 'docker compose -f docker-compose.prod.yml up -d'
+                    sh "docker compose -f ${env.COMPOSE_FILE} up -d"
                 }
             }
         }
@@ -41,7 +37,7 @@ pipeline {
     post {
         failure {
             echo 'Fehler beim Deployment – räume auf.'
-            sh 'docker compose -f docker-compose.yml down'
+            sh "docker compose -f ${env.COMPOSE_FILE} down"
         }
         success {
             echo 'Deployment erfolgreich – Container laufen weiter.'
