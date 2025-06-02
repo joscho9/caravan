@@ -1,6 +1,7 @@
 package com.example.caravan_spring_project.repository;
 
 import com.example.caravan_spring_project.model.Caravan;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
@@ -11,6 +12,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CaravanRepository extends ListCrudRepository<Caravan, UUID> {
+public interface CaravanRepository extends JpaRepository<Caravan, UUID> {
 
 }

@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/caravans")
+@RequestMapping("/caravans")
 public class CaravanController {
 
     CaravanService caravanService;
