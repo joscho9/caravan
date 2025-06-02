@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import Header from "./Header.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 export default function CaravanList() {
     const [caravans, setCaravans] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${process.env.REACT_APP_API_URL}/caravans/all`)
+        fetch(`${API_URL}/caravans/all`)
             .then(response => response.json())
             .then(data => {
                 setCaravans(data);

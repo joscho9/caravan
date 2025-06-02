@@ -3,6 +3,10 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import 'photoswipe/style.css';
 import CaravanThumbnails from "./CaravanThumbnails.jsx";
 
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 export default function CaravanImageSection({ caravan }) {
     const lightboxRef = useRef(null);
 
@@ -28,7 +32,7 @@ export default function CaravanImageSection({ caravan }) {
             <div className="main_image_container" id="caravan-gallery">
                 {caravan.images.map((img, index) => (
                     <a
-                        href={`${process.env.REACT_APP_API_URL}/uploads/${img.filePath}`}
+                        href={`${API_URL}/uploads/${img.filePath}`}
                         data-pswp-width={img.width || 1200}
                         data-pswp-height={img.height || 800}
                         key={index}
@@ -38,7 +42,7 @@ export default function CaravanImageSection({ caravan }) {
                         {index === 0 && (
                             <img
                                 className="main_image"
-                                src={`${process.env.REACT_APP_API_URL}/uploads/${img.filePath}`}
+                                src={`${API_URL}/uploads/${img.filePath}`}
                                 alt={caravan.wohnwagentyp}
                                 style={{ cursor: 'pointer' }}
                             />
@@ -50,7 +54,7 @@ export default function CaravanImageSection({ caravan }) {
             <div className="thumbnail_container">
                 {caravan.images.map((img, index) => (
                     <a
-                        href={`${process.env.REACT_APP_API_URL}/uploads/${img.filePath}`}
+                        href={`${API_URL}/uploads/${img.filePath}`}
                         data-pswp-width={img.width || 1200}
                         data-pswp-height={img.height || 800}
                         key={index}
@@ -58,7 +62,7 @@ export default function CaravanImageSection({ caravan }) {
                         rel="noreferrer"
                     >
                         <img
-                            src={`${process.env.REACT_APP_API_URL}/uploads/${img.filePath}`}
+                            src={`${API_URL}/uploads/${img.filePath}`}
                             alt={`Thumbnail ${index}`}
                             className="thumbnail"
                             style={{

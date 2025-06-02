@@ -59,7 +59,6 @@ public class CaravanController {
         }
     }
 
-
     @PostMapping("/delete")
     public void deleteCaravan(UUID id) {
         caravanService.deleteCaravan(id);

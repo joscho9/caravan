@@ -10,11 +10,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
+        registry.addMapping("/**")
                 .allowedOrigins(
                         "http://localhost",
-                        "http://localhost:5173/",
-                        "http://localhost:3000",      // Für lokale Entwicklung
+                        "http://localhost:5173", // Für lokale Entwicklung
+                        "http://localhost:3000",      
                         "http://frontend:3000",       // Für Container-Kommunikation
                         "http://my-react-container:3000"  // Alternativ Container-Name
                 )

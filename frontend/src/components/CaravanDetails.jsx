@@ -6,6 +6,8 @@ import BookingForm from "./BookingForm.jsx";
 import CaravanDescription from "./CaravanDescription.jsx";
 import Header from "./Header.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 export default function CaravanDetail() {
     const { id } = useParams();
@@ -19,7 +21,7 @@ export default function CaravanDetail() {
     });
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/caravans/${id}`)
+        fetch(`${API_URL}/caravans/${id}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Caravan nicht gefunden");

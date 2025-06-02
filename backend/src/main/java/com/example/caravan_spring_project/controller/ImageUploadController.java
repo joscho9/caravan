@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/images")
+@RequestMapping("/images")
 public class ImageUploadController {
 
     private final ImageStorageService imageStorageService;
