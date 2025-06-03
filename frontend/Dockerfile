@@ -13,11 +13,12 @@ RUN npm ci --silent
 COPY . .
 
 # Optionaler Build-Parameter für API URL
-ARG REACT_APP_API_URL=http://localhost:8086/api
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 
 # Production-Build erstellen
-RUN echo "Building with API URL: $REACT_APP_API_URL" && npm run build
+RUN echo "VITE_API_URL=$VITE_API_URL" > .env.production
+RUN echo "Building with API URL: $VITE_API_URL" && npm run build
 
 
 # ---- Production Stage ----

@@ -4,7 +4,7 @@ import 'photoswipe/style.css';
 import CaravanThumbnails from "./CaravanThumbnails.jsx";
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 
 export default function CaravanImageSection({ caravan }) {
