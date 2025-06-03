@@ -16,7 +16,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:5173", // Für lokale Entwicklung
                         "http://localhost:3000",      
                         "http://frontend:3000",       // Für Container-Kommunikation
-                        "http://my-react-container:3000"  // Alternativ Container-Name
+                        "http://my-react-container:3000",  // Alternativ Container-Name
+                        "http://wohnwagenvermietung-niederkassel.de/"
+                        
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
