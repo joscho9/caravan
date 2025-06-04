@@ -38,7 +38,8 @@ export default function CaravanList() {
                     <a href={`/caravan/${caravan.id}`}>
                         <img
                             
-                            src={`${API_URL}/uploads/${caravan.images && caravan.images[0] && caravan.images[0].imagePath}`}
+                            // todo remove src={`${API_URL}/uploads/${caravan.images && caravan.images[0] && caravan.images[0].imagePath}`}
+                            src={`${API_URL}/uploads/${caravan.id}/${caravan.mainImagePath}`}
                             alt={caravan.wohnwagentyp}
                         />
                         <div className="caravan-info">
