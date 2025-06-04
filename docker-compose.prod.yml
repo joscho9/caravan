@@ -26,7 +26,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./uploads:/app/uploads
+      - caravan_uploads:/app/uploads
     networks:
       - caravan-net
 
