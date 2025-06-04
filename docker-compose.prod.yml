@@ -65,8 +65,8 @@ services:
 volumes:
   postgres_data:
   caravan_uploads:
+  pgadmin_data:
 
 
 networks:
   caravan-net:
-  pgadmin_data:
