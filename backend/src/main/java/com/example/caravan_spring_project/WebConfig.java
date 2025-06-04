@@ -18,7 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://frontend:3000",       // Für Container-Kommunikation
                         "http://my-react-container:3000",  // Alternativ Container-Name
                         "http://wohnwagenvermietung-niederkassel.de/"
-                        
+
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")

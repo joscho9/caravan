@@ -31,12 +31,14 @@ export default function CaravanList() {
 
                 // Debugging: file_path in Konsole ausgeben
                 console.log("Bildpfad:", caravan.imagePath);
+                //console.log(caravan.images[0].imagePath);
 
                 return(
                 <div key={caravan.id} className="caravan-tile">
                     <a href={`/caravan/${caravan.id}`}>
                         <img
-                            src={`/images/${caravan.imagePath}/main.webp`}
+                            
+                            src={`${API_URL}/uploads/${caravan.images && caravan.images[0] && caravan.images[0].imagePath}`}
                             alt={caravan.wohnwagentyp}
                         />
                         <div className="caravan-info">
