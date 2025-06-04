@@ -24,8 +24,8 @@ public class Caravan {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "image_path", nullable = false)
-    private String imagePath;
+    @Column(name = "main_image_path", nullable = true)
+    private String mainImagePath;
 
     @Column(name = "wohnwagentyp", nullable = false)
     private String wohnwagentyp;
