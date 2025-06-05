@@ -37,7 +37,6 @@ export default function CaravanList() {
                 <div key={caravan.id} className="caravan-tile">
                     <a href={`/caravan/${caravan.id}`}>
                         <img
-                            
                             // todo remove src={`${API_URL}/uploads/${caravan.images && caravan.images[0] && caravan.images[0].imagePath}`}
                             src={`${API_URL}/uploads/${caravan.id}/${caravan.mainImagePath}`}
                             alt={caravan.wohnwagentyp}

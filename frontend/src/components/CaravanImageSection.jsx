@@ -42,7 +42,8 @@ export default function CaravanImageSection({ caravan }) {
                         {index === 0 && (
                             <img
                                 className="main_image"
-                                src={`${API_URL}/uploads/${img.filePath}`}
+                                //src={`${API_URL}/uploads/${img.filePath}`}
+                                src={`${API_URL}/uploads/${caravan.id}/${caravan.mainImagePath}`}
                                 alt={caravan.wohnwagentyp}
                                 style={{ cursor: 'pointer' }}
                             />
