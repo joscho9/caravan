@@ -116,7 +116,7 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                             setShowPopup(true);
                         }}
                     >
-                        <img id="caravan-icon" src="/images/caravan.png" alt="caravan" /> Jetzt anfragen
+                        Jetzt anfragen
                     </button>
                 </div>
 
