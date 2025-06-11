@@ -102,8 +102,6 @@ export default function CaravanDetail() {
 
                     <div className="hairline"></div>
                     <CaravanDescription description={caravan.description} />
-                    <div className="hairline"></div>
-                    <h3>Haben Sie Fragen? Vermieter direkt kontaktieren:</h3>
                 </section>
 
                 <section id="right_col_section">

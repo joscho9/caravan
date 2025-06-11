@@ -119,15 +119,6 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                         Jetzt anfragen
                     </button>
                 </div>
-
-                <div>
-                    <p>Kostenlos anfragen: Keine Vorauszahlung erforderlich</p>
-                </div>
-
-                <div>
-                    <p>Haben Sie Fragen? Vermieter direkt kontaktieren:</p>
-                    <button type="button">+49... Rufnummer anzeigen</button>
-                </div>
             </form>
             {showPopup && <BookingPopup onClose={() => setShowPopup(false)} />}
         </div>

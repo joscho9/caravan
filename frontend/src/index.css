@@ -56,6 +56,7 @@ h1 {
   display:flex;
   box-sizing: content-box;
   max-height:300px;
+  margin-bottom: 10px;
 }
 
 .main_image_container{
