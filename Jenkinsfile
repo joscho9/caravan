@@ -80,30 +80,27 @@ pipeline {
                     ]) {
                         echo "📝 Creating .env file..."
                         
-                        // Erstelle .env Datei
-                        sh '''
-                            cat > .env << 'EOF'
-                            # Database Configuration
-                            POSTGRES_DB='''${POSTGRES_DB}'''
-                            POSTGRES_USER='''${POSTGRES_USER}'''
-                            POSTGRES_PASSWORD='''${POSTGRES_PASSWORD}'''
-                            POSTGRES_PORT='''${POSTGRES_PORT}'''
-                            
-                            # PgAdmin Configuration
-                            PGADMIN_DEFAULT_EMAIL='''${PGADMIN_DEFAULT_EMAIL}'''
-                            PGADMIN_DEFAULT_PASSWORD='''${PGADMIN_DEFAULT_PASSWORD}'''
-                            PGADMIN_PORT='''${PGADMIN_PORT}'''
-                            
-                            # API Configuration
-                            VITE_API_URL='''${VITE_API_URL}'''
-                            
-                            # Port Configuration
-                            FRONTEND_PORT='''${FRONTEND_PORT}'''
-                            BACKEND_PORT='''${BACKEND_PORT}'''
-                            PROD_FRONTEND_PORT='''${PROD_FRONTEND_PORT}'''
-                            PROD_BACKEND_PORT='''${PROD_BACKEND_PORT}'''
-                            EOF
-                        '''
+                        // Erstelle .env Datei mit writeFile (sicherer)
+                        writeFile file: '.env', text: """# Database Configuration
+POSTGRES_DB=${POSTGRES_DB}
+POSTGRES_USER=${POSTGRES_USER}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+POSTGRES_PORT=${POSTGRES_PORT}
+
+# PgAdmin Configuration
+PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+PGADMIN_PORT=${PGADMIN_PORT}
+
+# API Configuration
+VITE_API_URL=${VITE_API_URL}
+
+# Port Configuration
+FRONTEND_PORT=${FRONTEND_PORT}
+BACKEND_PORT=${BACKEND_PORT}
+PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT}
+PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
+"""
                         
                         // Validiere .env Datei
                         sh '''
