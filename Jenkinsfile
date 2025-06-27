@@ -4,65 +4,42 @@ pipeline {
     environment {
         COMPOSE_FILE = 'docker-compose.prod.yml'
         COMPOSE_PROJECT_NAME = 'caravan'
-        POSTGRES_PORT = '5432'
-        PGADMIN_PORT = '5050'
-        FRONTEND_PORT = '3000'
-        BACKEND_PORT = '8080'
-        PROD_FRONTEND_PORT = '3080'
-        PROD_BACKEND_PORT = '8086'
+        PORTS = [
+            POSTGRES_PORT: '5432',
+            PGADMIN_PORT: '5050',
+            FRONTEND_PORT: '3000',
+            BACKEND_PORT: '8080',
+            PROD_FRONTEND_PORT: '3080',
+            PROD_BACKEND_PORT: '8086'
+        ]
     }
 
     stages {
         stage('Checkout') {
-            steps {
-                checkout scm
-            }
+            steps { checkout scm }
         }
 
-        stage('Check Credentials') {
+        stage('Validate Credentials') {
             steps {
                 script {
-                    echo "🔍 Checking Jenkins credentials..."
-                    
-                    def missingCredentials = []
-                    def requiredCredentials = [
+                    def creds = [
                         'caravan-postgres-db',
-                        'caravan-postgres-user', 
+                        'caravan-postgres-user',
                         'caravan-postgres-password',
                         'caravan-pgadmin-email',
                         'caravan-pgadmin-password',
                         'caravan-api-url'
                     ]
-                    
-                    requiredCredentials.each { credId ->
-                        try {
-                            def cred = credentials(credId)
-                            if (cred == null) {
-                                missingCredentials.add(credId)
-                                echo "❌ Missing: ${credId}"
-                            } else {
-                                echo "✅ Found: ${credId}"
-                            }
-                        } catch (Exception e) {
-                            missingCredentials.add(credId)
-                            echo "❌ Error accessing: ${credId} - ${e.getMessage()}"
-                        }
+
+                    def missing = creds.findAll {
+                        try { credentials(it); false }
+                        catch (e) { echo "❌ $it"; true }
                     }
-                    
-                    if (missingCredentials.size() > 0) {
-                        error """
-                        🚨 Missing Jenkins credentials: ${missingCredentials.join(', ')}
-                        
-                        Please add these credentials in Jenkins:
-                        - Go to: Manage Jenkins > Manage Credentials > System > Global credentials
-                        - Add Credentials > Kind: Secret text
-                        - Use the exact IDs listed above
-                        
-                        See JENKINS_SETUP.md for detailed instructions.
-                        """
+
+                    if (missing) {
+                        error "🚨 Missing credentials: ${missing.join(', ')}"
                     }
-                    
-                    echo "✅ All credentials found!"
+                    echo "✅ All credentials present"
                 }
             }
         }
@@ -70,109 +47,38 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    withCredentials([
+                    def vars = [
                         string(credentialsId: 'caravan-postgres-db', variable: 'POSTGRES_DB'),
                         string(credentialsId: 'caravan-postgres-user', variable: 'POSTGRES_USER'),
                         string(credentialsId: 'caravan-postgres-password', variable: 'POSTGRES_PASSWORD'),
-                        string(credentialsId: 'caravan-pgadmin-email', variable: 'PGADMIN_DEFAULT_EMAIL'),
-                        string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_DEFAULT_PASSWORD'),
+                        string(credentialsId: 'caravan-pgadmin-email', variable: 'PGADMIN_EMAIL'),
+                        string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
-                    ]) {
-                        echo "📝 Creating .env file..."
-                        
-                        // Erstelle .env Datei mit writeFile (sicherer)
-                        writeFile file: '.env', text: """# Database Configuration
-POSTGRES_DB=${POSTGRES_DB}
-POSTGRES_USER=${POSTGRES_USER}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-POSTGRES_PORT=${POSTGRES_PORT}
+                    ]
 
-# PgAdmin Configuration
-PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-PGADMIN_PORT=${PGADMIN_PORT}
+                    withCredentials(vars) {
+                        def envVars = [
+                            "POSTGRES_DB=$POSTGRES_DB",
+                            "POSTGRES_USER=$POSTGRES_USER",
+                            "POSTGRES_PASSWORD=$POSTGRES_PASSWORD",
+                            "PGADMIN_DEFAULT_EMAIL=$PGADMIN_EMAIL",
+                            "PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD",
+                            "VITE_API_URL=$VITE_API_URL"
+                        ] + PORTS.collect { k, v -> "$k=$v" }
 
-# API Configuration
-VITE_API_URL=${VITE_API_URL}
+                        writeFile file: '.env', text: envVars.join('\n') + '\n'
+                        sh '[ -s .env ] || { echo "❌ .env fehlt"; exit 1; }'
 
-# Port Configuration
-FRONTEND_PORT=${FRONTEND_PORT}
-BACKEND_PORT=${BACKEND_PORT}
-PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT}
-PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
-"""
-                        
-                        // Validiere .env Datei
-                        sh '''
-                            if [ ! -f .env ] || [ ! -s .env ]; then
-                                echo "❌ .env file is missing or empty!"
-                                exit 1
-                            fi
-                            echo "✅ .env file created successfully"
-                            echo "📄 .env content (without passwords):"
-                            grep -v PASSWORD .env || true
-                        '''
-                        
-                        echo "🐳 Stopping old containers..."
-                        sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
-                        
-                        echo "🔨 Building images..."
-                        sh """
-                            docker compose -f ${env.COMPOSE_FILE} build --no-cache
-                        """
-                        
-                        echo "🚀 Starting services..."
-                        // Sichere Environment-Variablen-Übergabe
-                        sh '''
-                            export POSTGRES_DB='''${POSTGRES_DB}'''
-                            export POSTGRES_USER='''${POSTGRES_USER}'''
-                            export POSTGRES_PASSWORD='''${POSTGRES_PASSWORD}'''
-                            export PGADMIN_DEFAULT_EMAIL='''${PGADMIN_DEFAULT_EMAIL}'''
-                            export PGADMIN_DEFAULT_PASSWORD='''${PGADMIN_DEFAULT_PASSWORD}'''
-                            export VITE_API_URL='''${VITE_API_URL}'''
-                            export POSTGRES_PORT='''${POSTGRES_PORT}'''
-                            export PGADMIN_PORT='''${PGADMIN_PORT}'''
-                            export FRONTEND_PORT='''${FRONTEND_PORT}'''
-                            export BACKEND_PORT='''${BACKEND_PORT}'''
-                            export PROD_FRONTEND_PORT='''${PROD_FRONTEND_PORT}'''
-                            export PROD_BACKEND_PORT='''${PROD_BACKEND_PORT}'''
-                            
-                            echo "Starting with environment variables:"
-                            echo "POSTGRES_DB: $POSTGRES_DB"
-                            echo "POSTGRES_USER: $POSTGRES_USER"
-                            echo "POSTGRES_PASSWORD: [HIDDEN]"
-                            echo "PGADMIN_EMAIL: $PGADMIN_DEFAULT_EMAIL"
-                            echo "PGADMIN_PASSWORD: [HIDDEN]"
-                            echo "API_URL: $VITE_API_URL"
-                            
-                            docker compose -f '''${COMPOSE_FILE}''' up -d
-                        '''
-                        
-                        echo "⏳ Waiting for services to be healthy..."
-                        sh '''
-                            sleep 10
-                            echo "=== Container Status ==="
-                            docker compose -f '''${COMPOSE_FILE}''' ps
-                            
-                            echo "=== PostgreSQL Logs ==="
-                            docker compose -f '''${COMPOSE_FILE}''' logs caravan-postgres || echo "Could not get PostgreSQL logs"
-                            
-                            echo "=== Waiting longer for services ==="
-                            sleep 20
-                            docker compose -f '''${COMPOSE_FILE}''' ps
-                        '''
-                        
-                        echo "🏥 Running health checks..."
-                        sh """
-                            echo "=== Health Check ==="
-                            docker compose -f ${env.COMPOSE_FILE} ps
-                            
-                            echo "Checking backend health..."
-                            curl -f http://localhost:${PROD_BACKEND_PORT}/actuator/health || echo "Backend health check failed"
-                            
-                            echo "Checking frontend..."
-                            curl -f http://localhost:${PROD_FRONTEND_PORT} || echo "Frontend check failed"
-                        """
+                        sh "docker compose -f $COMPOSE_FILE down --remove-orphans || true"
+                        sh "docker compose -f $COMPOSE_FILE build --no-cache"
+                        sh "set -a && . .env && docker compose -f $COMPOSE_FILE up -d"
+
+                        sleep 10
+                        sh "docker compose -f $COMPOSE_FILE ps"
+
+                        echo "🏥 Health Checks"
+                        sh "curl -f http://localhost:${PORTS.PROD_BACKEND_PORT}/actuator/health || echo '❌ Backend'"
+                        sh "curl -f http://localhost:${PORTS.PROD_FRONTEND_PORT} || echo '❌ Frontend'"
                     }
                 }
             }
@@ -180,31 +86,20 @@ PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
     }
 
     post {
-        always {
-            sh 'rm -f .env'
-        }
+        always { sh 'rm -f .env' }
         failure {
-            echo '❌ Deployment failed - cleaning up...'
-            sh """
-                echo "=== Final Container Status ==="
-                docker compose -f ${env.COMPOSE_FILE} ps || true
-                
-                echo "=== PostgreSQL Logs ==="
-                docker compose -f ${env.COMPOSE_FILE} logs caravan-postgres || true
-                
-                echo "=== Cleaning up ==="
-                docker compose -f ${env.COMPOSE_FILE} down --remove-orphans
-            """
-            sh 'rm -f .env'
+            echo '❌ Fehler beim Deployment'
+            sh "docker compose -f $COMPOSE_FILE ps || true"
+            sh "docker compose -f $COMPOSE_FILE logs caravan-postgres || true"
+            sh "docker compose -f $COMPOSE_FILE down --remove-orphans"
         }
         success {
-            echo '✅ Deployment successful!'
+            echo '✅ Deployment erfolgreich!'
             sh """
-                echo "=== Final Status ==="
-                docker compose -f ${env.COMPOSE_FILE} ps
-                echo "Frontend: http://localhost:${PROD_FRONTEND_PORT}"
-                echo "Backend: http://localhost:${PROD_BACKEND_PORT}"
-                echo "PgAdmin: http://localhost:${PGADMIN_PORT}"
+                docker compose -f $COMPOSE_FILE ps
+                echo "Frontend: http://localhost:${PORTS.PROD_FRONTEND_PORT}"
+                echo "Backend: http://localhost:${PORTS.PROD_BACKEND_PORT}"
+                echo "PgAdmin: http://localhost:${PORTS.PGADMIN_PORT}"
             """
         }
     }
