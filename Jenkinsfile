@@ -117,10 +117,38 @@ PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
                         sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
                         
                         echo "🔨 Building images..."
-                        sh "docker compose -f ${env.COMPOSE_FILE} build --no-cache"
+                        sh """
+                            POSTGRES_DB=${POSTGRES_DB} \
+                            POSTGRES_USER=${POSTGRES_USER} \
+                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL} \
+                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD} \
+                            VITE_API_URL=${VITE_API_URL} \
+                            POSTGRES_PORT=${POSTGRES_PORT} \
+                            PGADMIN_PORT=${PGADMIN_PORT} \
+                            FRONTEND_PORT=${FRONTEND_PORT} \
+                            BACKEND_PORT=${BACKEND_PORT} \
+                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT} \
+                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT} \
+                            docker compose -f ${env.COMPOSE_FILE} build --no-cache
+                        """
                         
                         echo "🚀 Starting services..."
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d"
+                        sh """
+                            POSTGRES_DB=${POSTGRES_DB} \
+                            POSTGRES_USER=${POSTGRES_USER} \
+                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL} \
+                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD} \
+                            VITE_API_URL=${VITE_API_URL} \
+                            POSTGRES_PORT=${POSTGRES_PORT} \
+                            PGADMIN_PORT=${PGADMIN_PORT} \
+                            FRONTEND_PORT=${FRONTEND_PORT} \
+                            BACKEND_PORT=${BACKEND_PORT} \
+                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT} \
+                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT} \
+                            docker compose -f ${env.COMPOSE_FILE} up -d
+                        """
                         
                         echo "⏳ Waiting for services to be healthy..."
                         sh '''
