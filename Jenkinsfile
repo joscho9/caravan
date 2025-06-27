@@ -14,15 +14,8 @@ pipeline {
         PROD_FRONTEND_PORT = '3080'
         PROD_BACKEND_PORT = '8086'
 
-        // Define a list of all required credentials for easier management
-        REQUIRED_CREDENTIALS = [
-            'caravan-postgres-db',
-            'caravan-postgres-user',
-            'caravan-postgres-password',
-            'caravan-pgadmin-email',
-            'caravan-pgadmin-password',
-            'caravan-api-url'
-        ]
+        // REQUIRED_CREDENTIALS cannot be a Groovy list directly in the environment block.
+        // It will be defined inside the 'script' block of the 'Validate Credentials' stage.
     }
 
     stages {
@@ -35,8 +28,19 @@ pipeline {
         stage('Validate Credentials') {
             steps {
                 script {
+                    // Define the list of required credentials inside a script block
+                    // where Groovy syntax for lists is allowed.
+                    def requiredCredentials = [
+                        'caravan-postgres-db',
+                        'caravan-postgres-user',
+                        'caravan-postgres-password',
+                        'caravan-pgadmin-email',
+                        'caravan-pgadmin-password',
+                        'caravan-api-url'
+                    ]
+
                     def missing = []
-                    for (def credId : env.REQUIRED_CREDENTIALS) {
+                    for (def credId : requiredCredentials) { // Iterate over the defined list
                         try {
                             credentials(credId) // Attempt to retrieve to check existence
                         } catch (Exception e) {
