@@ -141,25 +141,21 @@ pipeline {
     }
 
     post {
-        // 'always' runs before 'failure' or 'success'
-        // We'll put cleanup in 'always' but guard it against failure actions needing the .env file
         always {
-            // This section only contains cleanup steps to run regardless of stage outcome.
-            // .env cleanup is moved to the end of success/failure if needed for diagnostics.
-            echo "Pipeline finished. Starting final cleanup."
+            // Keep this block minimal or for very generic info.
+            // DO NOT put .env cleanup here, as 'always' runs BEFORE success/failure.
+            echo "Pipeline finished. Performing post-build actions."
         }
         failure {
             echo '❌ Deployment failed!'
             echo 'Gathering diagnostic information...'
             dir(pwd()) {
-                // For diagnostic commands in failure, we prioritize getting output
-                // over strictly avoiding warnings if .env is missing.
-                // However, the .env file *should* still exist here as 'always' hasn't removed it yet.
-                // Re-sourcing here for consistency and to avoid "variable not set" warnings if .env still exists.
+                // The .env file will still be present here.
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps || true"
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs || true" // Get ALL logs for debugging
                 echo "Attempting to bring down services after failure..."
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} down --remove-orphans --volumes || true"
+                // IMPORTANT: DO NOT remove .env here on failure. It helps with debugging the workspace.
             }
         }
         success {
@@ -173,20 +169,11 @@ pipeline {
                     echo "PgAdmin: http://localhost:${env.PGADMIN_PORT}"
                     echo "------------------------"
                 """
+                echo "Cleaning up .env file after successful deployment..."
+                sh 'rm -f .env' // ONLY remove .env on successful runs
             }
         }
-        // This 'cleanup' runs after 'success' or 'failure'
-        // It ensures .env is removed last.
-        // NOTE: This 'cleanup' block structure is a common pattern for 'post' actions.
-        // The 'always' block here is conceptually run *first* among post-actions,
-        // but its content should be minimal, or it should ensure subsequent blocks can still function.
-        // A more robust way to do 'always-cleanup' is a dedicated post-build step or a separate stage.
-        // For now, let's keep it simple:
-        finally { // The 'finally' block in 'post' runs *after* success/failure/unstable
-            echo "Final cleanup: removing .env file."
-            dir(pwd()) {
-                sh 'rm -f .env || true' // '|| true' to prevent failure if file is already gone
-            }
-        }
+        // No 'finally' block here, as it's not a valid declarative post condition.
+        // Cleanup on failure is handled by leaving .env in the workspace for diagnostics.
     }
 }
