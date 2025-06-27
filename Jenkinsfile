@@ -19,13 +19,12 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Check Credentials') {
             steps {
                 script {
-                    // Prüfe ob Credentials existieren
-                    def credentialsExist = true
-                    def missingCredentials = []
+                    echo "🔍 Checking Jenkins credentials..."
                     
+                    def missingCredentials = []
                     def requiredCredentials = [
                         'caravan-postgres-db',
                         'caravan-postgres-user', 
@@ -39,19 +38,38 @@ pipeline {
                         try {
                             def cred = credentials(credId)
                             if (cred == null) {
-                                credentialsExist = false
                                 missingCredentials.add(credId)
+                                echo "❌ Missing: ${credId}"
+                            } else {
+                                echo "✅ Found: ${credId}"
                             }
                         } catch (Exception e) {
-                            credentialsExist = false
                             missingCredentials.add(credId)
+                            echo "❌ Error accessing: ${credId} - ${e.getMessage()}"
                         }
                     }
                     
-                    if (!credentialsExist) {
-                        error "Missing Jenkins credentials: ${missingCredentials.join(', ')}. Please add them in Manage Jenkins > Manage Credentials."
+                    if (missingCredentials.size() > 0) {
+                        error """
+                        🚨 Missing Jenkins credentials: ${missingCredentials.join(', ')}
+                        
+                        Please add these credentials in Jenkins:
+                        - Go to: Manage Jenkins > Manage Credentials > System > Global credentials
+                        - Add Credentials > Kind: Secret text
+                        - Use the exact IDs listed above
+                        
+                        See JENKINS_SETUP.md for detailed instructions.
+                        """
                     }
                     
+                    echo "✅ All credentials found!"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
                     withCredentials([
                         string(credentialsId: 'caravan-postgres-db', variable: 'POSTGRES_DB'),
                         string(credentialsId: 'caravan-postgres-user', variable: 'POSTGRES_USER'),
@@ -60,6 +78,8 @@ pipeline {
                         string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_DEFAULT_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
                     ]) {
+                        echo "📝 Creating .env file..."
+                        
                         // Erstelle .env Datei
                         sh '''
                             cat > .env << 'EOF'
@@ -92,25 +112,26 @@ pipeline {
                                 exit 1
                             fi
                             echo "✅ .env file created successfully"
+                            echo "📄 .env content (without passwords):"
+                            grep -v PASSWORD .env || true
                         '''
                         
-                        // Stoppe alte Container
+                        echo "🐳 Stopping old containers..."
                         sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
                         
-                        // Baue und starte Services
-                        sh """
-                            docker compose -f ${env.COMPOSE_FILE} build --no-cache
-                            docker compose -f ${env.COMPOSE_FILE} up -d
-                        """
+                        echo "🔨 Building images..."
+                        sh "docker compose -f ${env.COMPOSE_FILE} build --no-cache"
                         
-                        // Warte auf Health Checks
+                        echo "🚀 Starting services..."
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d"
+                        
+                        echo "⏳ Waiting for services to be healthy..."
                         sh '''
-                            echo "Waiting for services to be healthy..."
                             sleep 30
                             docker compose -f '''${COMPOSE_FILE}''' ps
                         '''
                         
-                        // Health Check
+                        echo "🏥 Running health checks..."
                         sh """
                             echo "=== Health Check ==="
                             docker compose -f ${env.COMPOSE_FILE} ps
