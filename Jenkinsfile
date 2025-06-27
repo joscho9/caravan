@@ -62,8 +62,24 @@ pipeline {
                         string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
                     ]) {
-                        // Use a dedicated function for .env file creation for cleaner code
-                        createDotEnvFile()
+                        // Moved the .env file creation logic directly here
+                        def envVars = """
+                            POSTGRES_DB=${POSTGRES_DB}
+                            POSTGRES_USER=${POSTGRES_USER}
+                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+                            VITE_API_URL=${VITE_API_URL}
+                            POSTGRES_PORT=${env.POSTGRES_PORT}
+                            PGADMIN_PORT=${env.PGADMIN_PORT}
+                            FRONTEND_PORT=${env.FRONTEND_PORT}
+                            BACKEND_PORT=${env.BACKEND_PORT}
+                            PROD_FRONTEND_PORT=${env.PROD_FRONTEND_PORT}
+                            PROD_BACKEND_PORT=${env.PROD_BACKEND_PORT}
+                        """.stripIndent() // Use stripIndent() to remove leading whitespace
+
+                        writeFile file: '.env', text: envVars
+                        echo "Successfully created .env file."
 
                         // Ensure the .env file was created successfully before proceeding
                         sh '[ -s .env ] || { echo "❌ .env file is empty or missing."; exit 1; }'
@@ -75,7 +91,6 @@ pipeline {
                         sh "docker compose -f ${env.COMPOSE_FILE} build --no-cache"
 
                         echo "Starting Docker containers..."
-                        // Use sh -c for better handling of multiple commands in a single sh step
                         sh """
                             set -a
                             . .env
@@ -89,8 +104,6 @@ pipeline {
                         sh "docker compose -f ${env.COMPOSE_FILE} ps"
 
                         echo "🏥 Running Health Checks..."
-                        // Implement robust health checks with retry logic
-                        // Using a simple loop for retries. For more complex scenarios, consider the `retry` step.
                         def backendHealth = false
                         def frontendHealth = false
 
@@ -128,27 +141,6 @@ pipeline {
                 }
             }
         }
-    }
-
-    // Define helper function for .env file creation
-    void createDotEnvFile() {
-        def envVars = """
-            POSTGRES_DB=${POSTGRES_DB}
-            POSTGRES_USER=${POSTGRES_USER}
-            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-            PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
-            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
-            VITE_API_URL=${VITE_API_URL}
-            POSTGRES_PORT=${env.POSTGRES_PORT}
-            PGADMIN_PORT=${env.PGADMIN_PORT}
-            FRONTEND_PORT=${env.FRONTEND_PORT}
-            BACKEND_PORT=${env.BACKEND_PORT}
-            PROD_FRONTEND_PORT=${env.PROD_FRONTEND_PORT}
-            PROD_BACKEND_PORT=${env.PROD_BACKEND_PORT}
-        """.stripIndent() // Use stripIndent() to remove leading whitespace
-
-        writeFile file: '.env', text: envVars
-        echo "Successfully created .env file."
     }
 
     post {
