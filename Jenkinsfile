@@ -31,28 +31,29 @@ pipeline {
                         string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_DEFAULT_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
                     ]) {
+                        // Erstelle .env Datei
                         sh '''
-                        cat > .env << EOF
-                        # Database Configuration
-                        POSTGRES_DB=${POSTGRES_DB}
-                        POSTGRES_USER=${POSTGRES_USER}
-                        POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-                        POSTGRES_PORT=${POSTGRES_PORT}
-                        
-                        # PgAdmin Configuration
-                        PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-                        PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-                        PGADMIN_PORT=${PGADMIN_PORT}
-                        
-                        # API Configuration
-                        VITE_API_URL=${VITE_API_URL}
-                        
-                        # Port Configuration
-                        FRONTEND_PORT=${FRONTEND_PORT}
-                        BACKEND_PORT=${BACKEND_PORT}
-                        PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT}
-                        PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
-                        EOF
+                            cat > .env << 'EOF'
+                            # Database Configuration
+                            POSTGRES_DB='''${POSTGRES_DB}'''
+                            POSTGRES_USER='''${POSTGRES_USER}'''
+                            POSTGRES_PASSWORD='''${POSTGRES_PASSWORD}'''
+                            POSTGRES_PORT='''${POSTGRES_PORT}'''
+                            
+                            # PgAdmin Configuration
+                            PGADMIN_DEFAULT_EMAIL='''${PGADMIN_DEFAULT_EMAIL}'''
+                            PGADMIN_DEFAULT_PASSWORD='''${PGADMIN_DEFAULT_PASSWORD}'''
+                            PGADMIN_PORT='''${PGADMIN_PORT}'''
+                            
+                            # API Configuration
+                            VITE_API_URL='''${VITE_API_URL}'''
+                            
+                            # Port Configuration
+                            FRONTEND_PORT='''${FRONTEND_PORT}'''
+                            BACKEND_PORT='''${BACKEND_PORT}'''
+                            PROD_FRONTEND_PORT='''${PROD_FRONTEND_PORT}'''
+                            PROD_BACKEND_PORT='''${PROD_BACKEND_PORT}'''
+                            EOF
                         '''
                         
                         // Zeige .env Inhalt (ohne Passwörter)
@@ -64,6 +65,9 @@ pipeline {
                             echo "PGADMIN_EMAIL: ${PGADMIN_DEFAULT_EMAIL}"
                             echo "PGADMIN_PASSWORD: [HIDDEN]"
                             echo "API_URL: ${VITE_API_URL}"
+                            
+                            echo "=== .env file content (without passwords) ==="
+                            grep -v PASSWORD .env || true
                         '''
                     }
                 }
@@ -86,6 +90,8 @@ pipeline {
                         fi
                         
                         echo "✅ .env file is valid"
+                        echo "=== Checking required variables ==="
+                        grep -E "^(POSTGRES_DB|POSTGRES_USER|POSTGRES_PASSWORD|PGADMIN_DEFAULT_EMAIL|PGADMIN_DEFAULT_PASSWORD|VITE_API_URL)=" .env | sed 's/=.*/=***/' || echo "❌ Missing required variables"
                     '''
                 }
             }
@@ -94,23 +100,58 @@ pipeline {
         stage('Build & Deploy') {
             steps {
                 script {
-                    // Stoppe alte Container
-                    sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
-                    
-                    // Baue Images
-                    sh """
-                        docker compose -f ${env.COMPOSE_FILE} build --no-cache
-                    """
-                    
-                    // Starte Services
-                    sh "docker compose -f ${env.COMPOSE_FILE} up -d"
-                    
-                    // Warte auf Health Checks
-                    sh """
-                        echo "Waiting for services to be healthy..."
-                        sleep 30
-                        docker compose -f ${env.COMPOSE_FILE} ps
-                    """
+                    withCredentials([
+                        string(credentialsId: 'caravan-postgres-db', variable: 'POSTGRES_DB'),
+                        string(credentialsId: 'caravan-postgres-user', variable: 'POSTGRES_USER'),
+                        string(credentialsId: 'caravan-postgres-password', variable: 'POSTGRES_PASSWORD'),
+                        string(credentialsId: 'caravan-pgadmin-email', variable: 'PGADMIN_DEFAULT_EMAIL'),
+                        string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_DEFAULT_PASSWORD'),
+                        string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
+                    ]) {
+                        // Stoppe alte Container
+                        sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
+                        
+                        // Baue Images mit expliziten Environment-Variablen
+                        sh """
+                            POSTGRES_DB=${POSTGRES_DB} \
+                            POSTGRES_USER=${POSTGRES_USER} \
+                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL} \
+                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD} \
+                            VITE_API_URL=${VITE_API_URL} \
+                            POSTGRES_PORT=${POSTGRES_PORT} \
+                            PGADMIN_PORT=${PGADMIN_PORT} \
+                            FRONTEND_PORT=${FRONTEND_PORT} \
+                            BACKEND_PORT=${BACKEND_PORT} \
+                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT} \
+                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT} \
+                            docker compose -f ${env.COMPOSE_FILE} build --no-cache
+                        """
+                        
+                        // Starte Services mit expliziten Environment-Variablen
+                        sh """
+                            POSTGRES_DB=${POSTGRES_DB} \
+                            POSTGRES_USER=${POSTGRES_USER} \
+                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL} \
+                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD} \
+                            VITE_API_URL=${VITE_API_URL} \
+                            POSTGRES_PORT=${POSTGRES_PORT} \
+                            PGADMIN_PORT=${PGADMIN_PORT} \
+                            FRONTEND_PORT=${FRONTEND_PORT} \
+                            BACKEND_PORT=${BACKEND_PORT} \
+                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT} \
+                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT} \
+                            docker compose -f ${env.COMPOSE_FILE} up -d
+                        """
+                        
+                        // Warte auf Health Checks
+                        sh """
+                            echo "Waiting for services to be healthy..."
+                            sleep 30
+                            docker compose -f ${env.COMPOSE_FILE} ps
+                        """
+                    }
                 }
             }
         }
