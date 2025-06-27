@@ -22,6 +22,36 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
+                    // Prüfe ob Credentials existieren
+                    def credentialsExist = true
+                    def missingCredentials = []
+                    
+                    def requiredCredentials = [
+                        'caravan-postgres-db',
+                        'caravan-postgres-user', 
+                        'caravan-postgres-password',
+                        'caravan-pgadmin-email',
+                        'caravan-pgadmin-password',
+                        'caravan-api-url'
+                    ]
+                    
+                    requiredCredentials.each { credId ->
+                        try {
+                            def cred = credentials(credId)
+                            if (cred == null) {
+                                credentialsExist = false
+                                missingCredentials.add(credId)
+                            }
+                        } catch (Exception e) {
+                            credentialsExist = false
+                            missingCredentials.add(credId)
+                        }
+                    }
+                    
+                    if (!credentialsExist) {
+                        error "Missing Jenkins credentials: ${missingCredentials.join(', ')}. Please add them in Manage Jenkins > Manage Credentials."
+                    }
+                    
                     withCredentials([
                         string(credentialsId: 'caravan-postgres-db', variable: 'POSTGRES_DB'),
                         string(credentialsId: 'caravan-postgres-user', variable: 'POSTGRES_USER'),
