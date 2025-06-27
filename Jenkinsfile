@@ -32,27 +32,27 @@ pipeline {
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
                     ]) {
                         sh '''
-                            cat > .env << EOF
-                            # Database Configuration
-                            POSTGRES_DB=${POSTGRES_DB}
-                            POSTGRES_USER=${POSTGRES_USER}
-                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-                            POSTGRES_PORT=${POSTGRES_PORT}
-                            
-                            # PgAdmin Configuration
-                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-                            PGADMIN_PORT=${PGADMIN_PORT}
-                            
-                            # API Configuration
-                            VITE_API_URL=${VITE_API_URL}
-                            
-                            # Port Configuration
-                            FRONTEND_PORT=${FRONTEND_PORT}
-                            BACKEND_PORT=${BACKEND_PORT}
-                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT}
-                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
-                            EOF
+                        cat > .env << EOF
+                        # Database Configuration
+                        POSTGRES_DB=${POSTGRES_DB}
+                        POSTGRES_USER=${POSTGRES_USER}
+                        POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+                        POSTGRES_PORT=${POSTGRES_PORT}
+                        
+                        # PgAdmin Configuration
+                        PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+                        PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+                        PGADMIN_PORT=${PGADMIN_PORT}
+                        
+                        # API Configuration
+                        VITE_API_URL=${VITE_API_URL}
+                        
+                        # Port Configuration
+                        FRONTEND_PORT=${FRONTEND_PORT}
+                        BACKEND_PORT=${BACKEND_PORT}
+                        PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT}
+                        PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
+                        EOF
                         '''
                         
                         // Zeige .env Inhalt (ohne Passwörter)
