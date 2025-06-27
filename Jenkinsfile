@@ -26,9 +26,9 @@ pipeline {
                     withCredentials([
                         string(credentialsId: 'caravan-postgres-db', variable: 'POSTGRES_DB'),
                         string(credentialsId: 'caravan-postgres-user', variable: 'POSTGRES_USER'),
-                        password(credentialsId: 'caravan-postgres-password', variable: 'POSTGRES_PASSWORD'),
+                        string(credentialsId: 'caravan-postgres-password', variable: 'POSTGRES_PASSWORD'),
                         string(credentialsId: 'caravan-pgadmin-email', variable: 'PGADMIN_DEFAULT_EMAIL'),
-                        password(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_DEFAULT_PASSWORD'),
+                        string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_DEFAULT_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
                     ]) {
                         sh '''
