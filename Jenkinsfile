@@ -118,41 +118,47 @@ PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
                         
                         echo "🔨 Building images..."
                         sh """
-                            POSTGRES_DB=${POSTGRES_DB} \
-                            POSTGRES_USER=${POSTGRES_USER} \
-                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL} \
-                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD} \
-                            VITE_API_URL=${VITE_API_URL} \
-                            POSTGRES_PORT=${POSTGRES_PORT} \
-                            PGADMIN_PORT=${PGADMIN_PORT} \
-                            FRONTEND_PORT=${FRONTEND_PORT} \
-                            BACKEND_PORT=${BACKEND_PORT} \
-                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT} \
-                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT} \
                             docker compose -f ${env.COMPOSE_FILE} build --no-cache
                         """
                         
                         echo "🚀 Starting services..."
-                        sh """
-                            POSTGRES_DB=${POSTGRES_DB} \
-                            POSTGRES_USER=${POSTGRES_USER} \
-                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL} \
-                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD} \
-                            VITE_API_URL=${VITE_API_URL} \
-                            POSTGRES_PORT=${POSTGRES_PORT} \
-                            PGADMIN_PORT=${PGADMIN_PORT} \
-                            FRONTEND_PORT=${FRONTEND_PORT} \
-                            BACKEND_PORT=${BACKEND_PORT} \
-                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT} \
-                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT} \
-                            docker compose -f ${env.COMPOSE_FILE} up -d
-                        """
+                        // Sichere Environment-Variablen-Übergabe
+                        sh '''
+                            export POSTGRES_DB='''${POSTGRES_DB}'''
+                            export POSTGRES_USER='''${POSTGRES_USER}'''
+                            export POSTGRES_PASSWORD='''${POSTGRES_PASSWORD}'''
+                            export PGADMIN_DEFAULT_EMAIL='''${PGADMIN_DEFAULT_EMAIL}'''
+                            export PGADMIN_DEFAULT_PASSWORD='''${PGADMIN_DEFAULT_PASSWORD}'''
+                            export VITE_API_URL='''${VITE_API_URL}'''
+                            export POSTGRES_PORT='''${POSTGRES_PORT}'''
+                            export PGADMIN_PORT='''${PGADMIN_PORT}'''
+                            export FRONTEND_PORT='''${FRONTEND_PORT}'''
+                            export BACKEND_PORT='''${BACKEND_PORT}'''
+                            export PROD_FRONTEND_PORT='''${PROD_FRONTEND_PORT}'''
+                            export PROD_BACKEND_PORT='''${PROD_BACKEND_PORT}'''
+                            
+                            echo "Starting with environment variables:"
+                            echo "POSTGRES_DB: $POSTGRES_DB"
+                            echo "POSTGRES_USER: $POSTGRES_USER"
+                            echo "POSTGRES_PASSWORD: [HIDDEN]"
+                            echo "PGADMIN_EMAIL: $PGADMIN_DEFAULT_EMAIL"
+                            echo "PGADMIN_PASSWORD: [HIDDEN]"
+                            echo "API_URL: $VITE_API_URL"
+                            
+                            docker compose -f '''${COMPOSE_FILE}''' up -d
+                        '''
                         
                         echo "⏳ Waiting for services to be healthy..."
                         sh '''
-                            sleep 30
+                            sleep 10
+                            echo "=== Container Status ==="
+                            docker compose -f '''${COMPOSE_FILE}''' ps
+                            
+                            echo "=== PostgreSQL Logs ==="
+                            docker compose -f '''${COMPOSE_FILE}''' logs caravan-postgres || echo "Could not get PostgreSQL logs"
+                            
+                            echo "=== Waiting longer for services ==="
+                            sleep 20
                             docker compose -f '''${COMPOSE_FILE}''' ps
                         '''
                         
@@ -179,7 +185,16 @@ PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
         }
         failure {
             echo '❌ Deployment failed - cleaning up...'
-            sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans"
+            sh """
+                echo "=== Final Container Status ==="
+                docker compose -f ${env.COMPOSE_FILE} ps || true
+                
+                echo "=== PostgreSQL Logs ==="
+                docker compose -f ${env.COMPOSE_FILE} logs caravan-postgres || true
+                
+                echo "=== Cleaning up ==="
+                docker compose -f ${env.COMPOSE_FILE} down --remove-orphans
+            """
             sh 'rm -f .env'
         }
         success {
