@@ -59,8 +59,7 @@ pipeline {
                         string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
                     ]) {
-                        // Ensure all shell commands run within the workspace directory
-                        dir(pwd()) { // pwd() returns the current workspace directory path
+                        dir(pwd()) {
                             def envVars = """
                                 POSTGRES_DB=${POSTGRES_DB}
                                 POSTGRES_USER=${POSTGRES_USER}
@@ -79,25 +78,26 @@ pipeline {
                             writeFile file: '.env', text: envVars
                             echo "Successfully created .env file in ${pwd()}/.env"
 
-                            // Ensure the .env file was created successfully before proceeding
                             sh '[ -s .env ] || { echo "❌ .env file is empty or missing."; exit 1; }'
 
-                            echo "Attempting to bring down existing containers and remove orphans..."
-                            sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
+                            echo "Attempting to bring down existing containers and remove orphans AND VOLUMES..."
+                            // Source .env for down as well to avoid warnings if it needs to parse it for volume names etc.
+                            sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} down --remove-orphans --volumes || true"
 
                             echo "Building Docker images..."
-                            sh "docker compose -f ${env.COMPOSE_FILE} build --no-cache"
+                            // Build doesn't strictly need .env for image building, but harmless to include
+                            sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} build --no-cache"
 
                             echo "Starting Docker containers..."
-                            // Remove 'set -a && . .env' as docker compose will automatically pick up .env
-                            // from the current directory if it exists.
-                            sh "docker compose -f ${env.COMPOSE_FILE} up -d"
+                            // CRITICAL: Ensure .env is sourced for 'up' to provide secrets
+                            sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} up -d"
 
                             echo "Waiting for services to come online..."
                             sleep 20
 
                             echo "Verifying running containers..."
-                            sh "docker compose -f ${env.COMPOSE_FILE} ps"
+                            // Source .env for 'ps' to avoid warnings
+                            sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
 
                             echo "🏥 Running Health Checks..."
                             def backendHealth = false
@@ -105,7 +105,8 @@ pipeline {
 
                             for (int i = 0; i < 3; i++) {
                                 try {
-                                    sh "curl -sS -o /dev/null -w '%{http_code}' http://localhost:${env.PROD_BACKEND_PORT}/actuator/health | grep 200"
+                                    // Health checks might not need .env, but keeping the pattern
+                                    sh "curl -f http://localhost:${env.PROD_BACKEND_PORT}/actuator/health | grep '\"status\":\"UP\"'" // More robust check
                                     echo "✅ Backend is healthy."
                                     backendHealth = true
                                     break
@@ -120,20 +121,20 @@ pipeline {
 
                             for (int i = 0; i < 3; i++) {
                                 try {
-                                    sh "curl -sS -o /dev/null -w '%{http_code}' http://localhost:${env.PROD_FRONTEND_PORT} | grep 200"
+                                    sh "curl -f http://localhost:${env.PROD_FRONTEND_PORT}" // Basic check for frontend
                                     echo "✅ Frontend is healthy."
                                     frontendHealth = true
                                     break
                                 } catch (Exception e) {
                                     echo "Frontend not healthy yet, retrying in 5 seconds... (${i+1}/3)"
                                     sleep 5
-                                }
                             }
+                        }
                             if (!frontendHealth) {
                                 error "❌ Frontend health check failed after multiple attempts."
                             }
                             echo "All services are healthy."
-                        } // End of dir(pwd())
+                        }
                     }
                 }
             }
@@ -143,7 +144,6 @@ pipeline {
     post {
         always {
             echo "Cleaning up .env file..."
-            // Ensure this runs in the workspace context as well
             dir(pwd()) {
                 sh 'rm -f .env'
             }
@@ -151,18 +151,20 @@ pipeline {
         failure {
             echo '❌ Deployment failed!'
             echo 'Gathering diagnostic information...'
-            dir(pwd()) { // Ensure these commands also run in the correct directory
-                sh "docker compose -f ${env.COMPOSE_FILE} ps || true"
-                sh "docker compose -f ${env.COMPOSE_FILE} logs || true"
+            dir(pwd()) {
+                // Source .env for ps and logs in failure block to avoid warnings
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps || true"
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs || true"
                 echo "Attempting to bring down services after failure..."
-                sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} down --remove-orphans --volumes || true"
             }
         }
         success {
             echo '✅ Deployment successful!'
-            dir(pwd()) { // And these too
+            dir(pwd()) {
+                // Source .env for ps in success block to avoid warnings
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
                 sh """
-                    docker compose -f ${env.COMPOSE_FILE} ps
                     echo "--- Access Endpoints ---"
                     echo "Frontend: http://localhost:${env.PROD_FRONTEND_PORT}"
                     echo "Backend: http://localhost:${env.PROD_BACKEND_PORT}"
