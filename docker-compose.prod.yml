@@ -1,72 +1,49 @@
 services:
 
-  react-frontend:
+  frontend:
+    extends:
+      file: docker-compose.common.yml
+      service: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://193.33.167.253:8086/api 
+        VITE_API_URL: ${VITE_API_URL}
     ports:
-      - "3080:80"
+      - "${PROD_FRONTEND_PORT}:80"
     restart: always
-    networks:
-      - caravan-net  # <-- frontend muss im selben Netz sein wie backend!
 
   backend:
-    image: spring-boot-caravan-image
-    build:
-      context: ./backend
+    extends:
+      file: docker-compose.common.yml
+      service: backend
     ports:
-      - "8086:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/caravan_db
-      SPRING_DATASOURCE_USERNAME: myuser
-      SPRING_DATASOURCE_PASSWORD: secret
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - "${PROD_BACKEND_PORT}:8080"
     volumes:
       - caravan_uploads:/app/uploads
-    networks:
-      - caravan-net
+    restart: always
+
 
   postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: caravan_db
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: secret
+    extends:
+      file: docker-compose.common.yml
+      service: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser -d caravan_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - caravan-net
 
   pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: supersecurepassword
+    extends:
+      file: docker-compose.common.yml
+      service: pgadmin
     ports:
-      - "5050:80"
-    depends_on:
-      - postgres
+      - "${PGADMIN_PORT}:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - caravan-net
-
 
 volumes:
   postgres_data:
   caravan_uploads:
   pgadmin_data:
-
 
 networks:
   caravan-net:
