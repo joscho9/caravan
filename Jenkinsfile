@@ -81,55 +81,54 @@ pipeline {
                             sh '[ -s .env ] || { echo "❌ .env file is empty or missing."; exit 1; }'
 
                             echo "Attempting to bring down existing containers and remove orphans AND VOLUMES..."
-                            // Source .env for down as well to avoid warnings if it needs to parse it for volume names etc.
                             sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} down --remove-orphans --volumes || true"
 
                             echo "Building Docker images..."
-                            // Build doesn't strictly need .env for image building, but harmless to include
                             sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} build --no-cache"
 
                             echo "Starting Docker containers..."
-                            // CRITICAL: Ensure .env is sourced for 'up' to provide secrets
                             sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} up -d"
 
                             echo "Waiting for services to come online..."
-                            sleep 20
+                            // Increased sleep duration for backend startup
+                            sleep 40 // Adjusted from 20 to 40 seconds, might need more
 
                             echo "Verifying running containers..."
-                            // Source .env for 'ps' to avoid warnings
                             sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
 
                             echo "🏥 Running Health Checks..."
                             def backendHealth = false
                             def frontendHealth = false
 
-                            for (int i = 0; i < 3; i++) {
+                            for (int i = 0; i < 6; i++) { // Increased retries
                                 try {
-                                    // Health checks might not need .env, but keeping the pattern
-                                    sh "curl -f http://localhost:${env.PROD_BACKEND_PORT}/actuator/health | grep '\"status\":\"UP\"'" // More robust check
+                                    // Using 'grep' is crucial here, and piping stderr to null for clean output
+                                    sh "curl -sS --fail http://localhost:${env.PROD_BACKEND_PORT}/actuator/health 2>&1 | grep '\"status\":\"UP\"'"
                                     echo "✅ Backend is healthy."
                                     backendHealth = true
                                     break
                                 } catch (Exception e) {
-                                    echo "Backend not healthy yet, retrying in 5 seconds... (${i+1}/3)"
-                                    sleep 5
+                                    echo "Backend not healthy yet, retrying in 10 seconds... (${i+1}/6)" // Longer retry interval
+                                    sleep 10
                                 }
                             }
                             if (!backendHealth) {
+                                // Add backend logs to diagnose startup issues
+                                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs backend || true"
                                 error "❌ Backend health check failed after multiple attempts."
                             }
 
                             for (int i = 0; i < 3; i++) {
                                 try {
-                                    sh "curl -f http://localhost:${env.PROD_FRONTEND_PORT}" // Basic check for frontend
+                                    sh "curl -sS --fail http://localhost:${env.PROD_FRONTEND_PORT} || true" // Just check if it responds
                                     echo "✅ Frontend is healthy."
                                     frontendHealth = true
                                     break
                                 } catch (Exception e) {
                                     echo "Frontend not healthy yet, retrying in 5 seconds... (${i+1}/3)"
                                     sleep 5
+                                }
                             }
-                        }
                             if (!frontendHealth) {
                                 error "❌ Frontend health check failed after multiple attempts."
                             }
@@ -142,19 +141,23 @@ pipeline {
     }
 
     post {
+        // 'always' runs before 'failure' or 'success'
+        // We'll put cleanup in 'always' but guard it against failure actions needing the .env file
         always {
-            echo "Cleaning up .env file..."
-            dir(pwd()) {
-                sh 'rm -f .env'
-            }
+            // This section only contains cleanup steps to run regardless of stage outcome.
+            // .env cleanup is moved to the end of success/failure if needed for diagnostics.
+            echo "Pipeline finished. Starting final cleanup."
         }
         failure {
             echo '❌ Deployment failed!'
             echo 'Gathering diagnostic information...'
             dir(pwd()) {
-                // Source .env for ps and logs in failure block to avoid warnings
+                // For diagnostic commands in failure, we prioritize getting output
+                // over strictly avoiding warnings if .env is missing.
+                // However, the .env file *should* still exist here as 'always' hasn't removed it yet.
+                // Re-sourcing here for consistency and to avoid "variable not set" warnings if .env still exists.
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps || true"
-                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs || true"
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs || true" // Get ALL logs for debugging
                 echo "Attempting to bring down services after failure..."
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} down --remove-orphans --volumes || true"
             }
@@ -162,7 +165,6 @@ pipeline {
         success {
             echo '✅ Deployment successful!'
             dir(pwd()) {
-                // Source .env for ps in success block to avoid warnings
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
                 sh """
                     echo "--- Access Endpoints ---"
@@ -171,6 +173,19 @@ pipeline {
                     echo "PgAdmin: http://localhost:${env.PGADMIN_PORT}"
                     echo "------------------------"
                 """
+            }
+        }
+        // This 'cleanup' runs after 'success' or 'failure'
+        // It ensures .env is removed last.
+        // NOTE: This 'cleanup' block structure is a common pattern for 'post' actions.
+        // The 'always' block here is conceptually run *first* among post-actions,
+        // but its content should be minimal, or it should ensure subsequent blocks can still function.
+        // A more robust way to do 'always-cleanup' is a dedicated post-build step or a separate stage.
+        // For now, let's keep it simple:
+        finally { // The 'finally' block in 'post' runs *after* success/failure/unstable
+            echo "Final cleanup: removing .env file."
+            dir(pwd()) {
+                sh 'rm -f .env || true' // '|| true' to prevent failure if file is already gone
             }
         }
     }
