@@ -2,38 +2,51 @@ pipeline {
     agent any
 
     environment {
+        // Use constants for better readability and maintainability
         COMPOSE_FILE = 'docker-compose.prod.yml'
         COMPOSE_PROJECT_NAME = 'caravan'
+
+        // Define all port variables at the top for easy overview
         POSTGRES_PORT = '5432'
         PGADMIN_PORT = '5050'
-        FRONTEND_PORT = '3000'
-        BACKEND_PORT = '8080'
+        FRONTEND_PORT = '3000' // Development port, might not be needed in prod context
+        BACKEND_PORT = '8080'  // Development port, might not be needed in prod context
         PROD_FRONTEND_PORT = '3080'
         PROD_BACKEND_PORT = '8086'
+
+        // Define a list of all required credentials for easier management
+        REQUIRED_CREDENTIALS = [
+            'caravan-postgres-db',
+            'caravan-postgres-user',
+            'caravan-postgres-password',
+            'caravan-pgadmin-email',
+            'caravan-pgadmin-password',
+            'caravan-api-url'
+        ]
     }
 
     stages {
         stage('Checkout') {
-            steps { checkout scm }
+            steps {
+                checkout scm
+            }
         }
 
         stage('Validate Credentials') {
             steps {
                 script {
-                    def required = [
-                        'caravan-postgres-db',
-                        'caravan-postgres-user',
-                        'caravan-postgres-password',
-                        'caravan-pgadmin-email',
-                        'caravan-pgadmin-password',
-                        'caravan-api-url'
-                    ]
-                    def missing = required.findAll {
-                        try { credentials(it); false }
-                        catch (ignored) { true }
+                    def missing = []
+                    for (def credId : env.REQUIRED_CREDENTIALS) {
+                        try {
+                            credentials(credId) // Attempt to retrieve to check existence
+                        } catch (Exception e) {
+                            missing.add(credId)
+                        }
                     }
-                    if (missing) error "🚨 Missing credentials: ${missing.join(', ')}"
-                    echo "✅ All credentials present"
+                    if (!missing.isEmpty()) {
+                        error "🚨 Missing credentials: ${missing.join(', ')}. Please configure them in Jenkins."
+                    }
+                    echo "✅ All required credentials are present."
                 }
             }
         }
@@ -49,55 +62,117 @@ pipeline {
                         string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
                     ]) {
-                        def envVars = """
-POSTGRES_DB=${POSTGRES_DB}
-POSTGRES_USER=${POSTGRES_USER}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
-PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
-VITE_API_URL=${VITE_API_URL}
-POSTGRES_PORT=${env.POSTGRES_PORT}
-PGADMIN_PORT=${env.PGADMIN_PORT}
-FRONTEND_PORT=${env.FRONTEND_PORT}
-BACKEND_PORT=${env.BACKEND_PORT}
-PROD_FRONTEND_PORT=${env.PROD_FRONTEND_PORT}
-PROD_BACKEND_PORT=${env.PROD_BACKEND_PORT}
-"""
+                        // Use a dedicated function for .env file creation for cleaner code
+                        createDotEnvFile()
 
-                        writeFile file: '.env', text: envVars
-                        sh '[ -s .env ] || { echo "❌ .env fehlt"; exit 1; }'
+                        // Ensure the .env file was created successfully before proceeding
+                        sh '[ -s .env ] || { echo "❌ .env file is empty or missing."; exit 1; }'
 
+                        echo "Attempting to bring down existing containers and remove orphans..."
                         sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
-                        sh "docker compose -f ${env.COMPOSE_FILE} build --no-cache"
-                        sh "set -a && . .env && docker compose -f ${env.COMPOSE_FILE} up -d"
 
-                        sleep 10
+                        echo "Building Docker images..."
+                        sh "docker compose -f ${env.COMPOSE_FILE} build --no-cache"
+
+                        echo "Starting Docker containers..."
+                        // Use sh -c for better handling of multiple commands in a single sh step
+                        sh """
+                            set -a
+                            . .env
+                            docker compose -f ${env.COMPOSE_FILE} up -d
+                        """
+
+                        echo "Waiting for services to come online..."
+                        sleep 20 // Increased sleep for more stability, adjust as needed
+
+                        echo "Verifying running containers..."
                         sh "docker compose -f ${env.COMPOSE_FILE} ps"
 
-                        echo "🏥 Health Checks"
-                        sh "curl -f http://localhost:${env.PROD_BACKEND_PORT}/actuator/health || echo '❌ Backend'"
-                        sh "curl -f http://localhost:${env.PROD_FRONTEND_PORT} || echo '❌ Frontend'"
+                        echo "🏥 Running Health Checks..."
+                        // Implement robust health checks with retry logic
+                        // Using a simple loop for retries. For more complex scenarios, consider the `retry` step.
+                        def backendHealth = false
+                        def frontendHealth = false
+
+                        for (int i = 0; i < 3; i++) {
+                            try {
+                                sh "curl -sS -o /dev/null -w '%{http_code}' http://localhost:${env.PROD_BACKEND_PORT}/actuator/health | grep 200"
+                                echo "✅ Backend is healthy."
+                                backendHealth = true
+                                break
+                            } catch (Exception e) {
+                                echo "Backend not healthy yet, retrying in 5 seconds... (${i+1}/3)"
+                                sleep 5
+                            }
+                        }
+                        if (!backendHealth) {
+                            error "❌ Backend health check failed after multiple attempts."
+                        }
+
+                        for (int i = 0; i < 3; i++) {
+                            try {
+                                sh "curl -sS -o /dev/null -w '%{http_code}' http://localhost:${env.PROD_FRONTEND_PORT} | grep 200"
+                                echo "✅ Frontend is healthy."
+                                frontendHealth = true
+                                break
+                            } catch (Exception e) {
+                                echo "Frontend not healthy yet, retrying in 5 seconds... (${i+1}/3)"
+                                sleep 5
+                            }
+                        }
+                        if (!frontendHealth) {
+                            error "❌ Frontend health check failed after multiple attempts."
+                        }
+                        echo "All services are healthy."
                     }
                 }
             }
         }
     }
 
+    // Define helper function for .env file creation
+    void createDotEnvFile() {
+        def envVars = """
+            POSTGRES_DB=${POSTGRES_DB}
+            POSTGRES_USER=${POSTGRES_USER}
+            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+            VITE_API_URL=${VITE_API_URL}
+            POSTGRES_PORT=${env.POSTGRES_PORT}
+            PGADMIN_PORT=${env.PGADMIN_PORT}
+            FRONTEND_PORT=${env.FRONTEND_PORT}
+            BACKEND_PORT=${env.BACKEND_PORT}
+            PROD_FRONTEND_PORT=${env.PROD_FRONTEND_PORT}
+            PROD_BACKEND_PORT=${env.PROD_BACKEND_PORT}
+        """.stripIndent() // Use stripIndent() to remove leading whitespace
+
+        writeFile file: '.env', text: envVars
+        echo "Successfully created .env file."
+    }
+
     post {
-        always { sh 'rm -f .env' }
+        always {
+            echo "Cleaning up .env file..."
+            sh 'rm -f .env'
+        }
         failure {
-            echo '❌ Fehler beim Deployment'
-            sh "docker compose -f ${env.COMPOSE_FILE} ps || true"
-            sh "docker compose -f ${env.COMPOSE_FILE} logs caravan-postgres || true"
-            sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans"
+            echo '❌ Deployment failed!'
+            echo 'Gathering diagnostic information...'
+            sh "docker compose -f ${env.COMPOSE_FILE} ps || true" // Show status
+            sh "docker compose -f ${env.COMPOSE_FILE} logs || true" // Get all logs for better debugging
+            echo "Attempting to bring down services after failure..."
+            sh "docker compose -f ${env.COMPOSE_FILE} down --remove-orphans || true"
         }
         success {
-            echo '✅ Deployment erfolgreich!'
+            echo '✅ Deployment successful!'
             sh """
                 docker compose -f ${env.COMPOSE_FILE} ps
+                echo "--- Access Endpoints ---"
                 echo "Frontend: http://localhost:${env.PROD_FRONTEND_PORT}"
                 echo "Backend: http://localhost:${env.PROD_BACKEND_PORT}"
                 echo "PgAdmin: http://localhost:${env.PGADMIN_PORT}"
+                echo "------------------------"
             """
         }
     }
