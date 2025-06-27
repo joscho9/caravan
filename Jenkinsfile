@@ -4,21 +4,8 @@ pipeline {
     environment {
         COMPOSE_FILE = 'docker-compose.prod.yml'
         COMPOSE_PROJECT_NAME = 'caravan'
-        // Database Credentials
-        POSTGRES_DB = credentials('caravan-postgres-db')
-        POSTGRES_USER = credentials('caravan-postgres-user')
-        POSTGRES_PASSWORD = credentials('caravan-postgres-password')
         POSTGRES_PORT = '5432'
-        
-        // PgAdmin Credentials
-        PGADMIN_DEFAULT_EMAIL = credentials('caravan-pgadmin-email')
-        PGADMIN_DEFAULT_PASSWORD = credentials('caravan-pgadmin-password')
         PGADMIN_PORT = '5050'
-        
-        // API Configuration
-        VITE_API_URL = credentials('caravan-api-url')
-        
-        // Port Configuration
         FRONTEND_PORT = '3000'
         BACKEND_PORT = '8080'
         PROD_FRONTEND_PORT = '3080'
@@ -35,39 +22,50 @@ pipeline {
         stage('Create .env') {
             steps {
                 script {
-                    // Erstelle .env Datei mit Credentials
-                    writeFile file: '.env', text: """
-# Database Configuration
-POSTGRES_DB=${POSTGRES_DB}
-POSTGRES_USER=${POSTGRES_USER}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-POSTGRES_PORT=${POSTGRES_PORT}
-
-# PgAdmin Configuration
-PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-PGADMIN_PORT=${PGADMIN_PORT}
-
-# API Configuration
-VITE_API_URL=${VITE_API_URL}
-
-# Port Configuration
-FRONTEND_PORT=${FRONTEND_PORT}
-BACKEND_PORT=${BACKEND_PORT}
-PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT}
-PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
-"""
-                    
-                    // Zeige .env Inhalt (ohne Passwörter)
-                    sh '''
-                        echo "=== .env created successfully ==="
-                        echo "POSTGRES_DB: ${POSTGRES_DB}"
-                        echo "POSTGRES_USER: ${POSTGRES_USER}"
-                        echo "POSTGRES_PASSWORD: [HIDDEN]"
-                        echo "PGADMIN_EMAIL: ${PGADMIN_DEFAULT_EMAIL}"
-                        echo "PGADMIN_PASSWORD: [HIDDEN]"
-                        echo "API_URL: ${VITE_API_URL}"
-                    '''
+                    // Sichere .env Datei Erstellung mit withCredentials
+                    withCredentials([
+                        string(credentialsId: 'caravan-postgres-db', variable: 'POSTGRES_DB'),
+                        string(credentialsId: 'caravan-postgres-user', variable: 'POSTGRES_USER'),
+                        password(credentialsId: 'caravan-postgres-password', variable: 'POSTGRES_PASSWORD'),
+                        string(credentialsId: 'caravan-pgadmin-email', variable: 'PGADMIN_DEFAULT_EMAIL'),
+                        password(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_DEFAULT_PASSWORD'),
+                        string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
+                    ]) {
+                        sh '''
+                            cat > .env << EOF
+                            # Database Configuration
+                            POSTGRES_DB=${POSTGRES_DB}
+                            POSTGRES_USER=${POSTGRES_USER}
+                            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+                            POSTGRES_PORT=${POSTGRES_PORT}
+                            
+                            # PgAdmin Configuration
+                            PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+                            PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+                            PGADMIN_PORT=${PGADMIN_PORT}
+                            
+                            # API Configuration
+                            VITE_API_URL=${VITE_API_URL}
+                            
+                            # Port Configuration
+                            FRONTEND_PORT=${FRONTEND_PORT}
+                            BACKEND_PORT=${BACKEND_PORT}
+                            PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT}
+                            PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
+                            EOF
+                        '''
+                        
+                        // Zeige .env Inhalt (ohne Passwörter)
+                        sh '''
+                            echo "=== .env created successfully ==="
+                            echo "POSTGRES_DB: ${POSTGRES_DB}"
+                            echo "POSTGRES_USER: ${POSTGRES_USER}"
+                            echo "POSTGRES_PASSWORD: [HIDDEN]"
+                            echo "PGADMIN_EMAIL: ${PGADMIN_DEFAULT_EMAIL}"
+                            echo "PGADMIN_PASSWORD: [HIDDEN]"
+                            echo "API_URL: ${VITE_API_URL}"
+                        '''
+                    }
                 }
             }
         }
@@ -75,19 +73,20 @@ PROD_BACKEND_PORT=${PROD_BACKEND_PORT}
         stage('Validate Environment') {
             steps {
                 script {
-                    // Validiere, dass alle Credentials gesetzt sind
-                    def requiredVars = [
-                        'POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD',
-                        'PGADMIN_DEFAULT_EMAIL', 'PGADMIN_DEFAULT_PASSWORD', 'VITE_API_URL'
-                    ]
-                    
-                    requiredVars.each { var ->
-                        if (!env[var]) {
-                            error "Required environment variable ${var} is not set!"
-                        }
-                    }
-                    
-                    echo "✅ All required environment variables are set"
+                    // Validiere, dass .env Datei existiert und nicht leer ist
+                    sh '''
+                        if [ ! -f .env ]; then
+                            echo "❌ .env file not found!"
+                            exit 1
+                        fi
+                        
+                        if [ ! -s .env ]; then
+                            echo "❌ .env file is empty!"
+                            exit 1
+                        fi
+                        
+                        echo "✅ .env file is valid"
+                    '''
                 }
             }
         }
