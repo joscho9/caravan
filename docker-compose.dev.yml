@@ -1,11 +1,9 @@
 services:
   frontend:
-    extends:
-      file: docker-compose.common.yml
-      service: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+    container_name: caravan-react-dev
     ports:
       - "${FRONTEND_PORT}:5173"
     volumes:
@@ -17,6 +15,8 @@ services:
       - VITE_PORT=5173
     depends_on:
       - backend
+    networks:
+      - caravan-net
 
   postgres:
     extends:

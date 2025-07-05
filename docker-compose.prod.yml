@@ -1,28 +1,28 @@
 services:
-
-  frontend:
-    extends:
-      file: docker-compose.common.yml
-      service: frontend
+  # Nginx Reverse Proxy + Frontend - Main entry point
+  nginx-proxy:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
       args:
         VITE_API_URL: ${VITE_API_URL}
+    container_name: caravan-nginx-proxy
     ports:
-      - "${PROD_FRONTEND_PORT}:80"
+      - "${REVERSE_PROXY_PORT}:80"
+    depends_on:
+      - backend
     restart: always
+    networks:
+      - caravan-net
 
   backend:
     extends:
       file: docker-compose.common.yml
       service: backend
-    ports:
-      - "${PROD_BACKEND_PORT}:8080"
+    # Remove external port - only accessible through nginx-proxy
     volumes:
       - caravan_uploads:/app/uploads
     restart: always
-
 
   postgres:
     extends:
@@ -35,8 +35,7 @@ services:
     extends:
       file: docker-compose.common.yml
       service: pgadmin
-    ports:
-      - "${PGADMIN_PORT}:80"
+    # Remove external port - accessible through nginx-proxy at /pgadmin/
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 

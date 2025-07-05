@@ -9,8 +9,7 @@ pipeline {
         PGADMIN_PORT = '5050'
         FRONTEND_PORT = '3000'
         BACKEND_PORT = '8080'
-        PROD_FRONTEND_PORT = '3080'
-        PROD_BACKEND_PORT = '8086'
+        REVERSE_PROXY_PORT = '3080'
     }
 
     stages {
@@ -71,8 +70,7 @@ pipeline {
                                 PGADMIN_PORT=${env.PGADMIN_PORT}
                                 FRONTEND_PORT=${env.FRONTEND_PORT}
                                 BACKEND_PORT=${env.BACKEND_PORT}
-                                PROD_FRONTEND_PORT=${env.PROD_FRONTEND_PORT}
-                                PROD_BACKEND_PORT=${env.PROD_BACKEND_PORT}
+                                REVERSE_PROXY_PORT=${env.REVERSE_PROXY_PORT}
                             """.stripIndent()
 
                             writeFile file: '.env', text: envVars
@@ -97,40 +95,41 @@ pipeline {
                             sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
 
                             echo "🏥 Running Health Checks..."
+                            def nginxHealth = false
                             def backendHealth = false
-                            def frontendHealth = false
 
-                            for (int i = 0; i < 6; i++) { // Increased retries
+                            // Check Nginx Proxy (Frontend + API)
+                            for (int i = 0; i < 6; i++) {
                                 try {
-                                    // Using 'grep' is crucial here, and piping stderr to null for clean output
-                                    sh "curl -sS --fail http://localhost:${env.PROD_BACKEND_PORT}/actuator/health 2>&1 | grep '\"status\":\"UP\"'"
-                                    echo "✅ Backend is healthy."
+                                    sh "curl -sS --fail http://localhost:${env.REVERSE_PROXY_PORT} || true"
+                                    echo "✅ Nginx Proxy (Frontend) is healthy."
+                                    nginxHealth = true
+                                    break
+                                } catch (Exception e) {
+                                    echo "Nginx Proxy not healthy yet, retrying in 10 seconds... (${i+1}/6)"
+                                    sleep 10
+                                }
+                            }
+                            if (!nginxHealth) {
+                                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs nginx-proxy || true"
+                                error "❌ Nginx Proxy health check failed after multiple attempts."
+                            }
+
+                            // Check Backend through Nginx Proxy
+                            for (int i = 0; i < 6; i++) {
+                                try {
+                                    sh "curl -sS --fail http://localhost:${env.REVERSE_PROXY_PORT}/api/actuator/health 2>&1 | grep '\"status\":\"UP\"'"
+                                    echo "✅ Backend (via Nginx Proxy) is healthy."
                                     backendHealth = true
                                     break
                                 } catch (Exception e) {
-                                    echo "Backend not healthy yet, retrying in 10 seconds... (${i+1}/6)" // Longer retry interval
+                                    echo "Backend not healthy yet, retrying in 10 seconds... (${i+1}/6)"
                                     sleep 10
                                 }
                             }
                             if (!backendHealth) {
-                                // Add backend logs to diagnose startup issues
                                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs backend || true"
                                 error "❌ Backend health check failed after multiple attempts."
-                            }
-
-                            for (int i = 0; i < 3; i++) {
-                                try {
-                                    sh "curl -sS --fail http://localhost:${env.PROD_FRONTEND_PORT} || true" // Just check if it responds
-                                    echo "✅ Frontend is healthy."
-                                    frontendHealth = true
-                                    break
-                                } catch (Exception e) {
-                                    echo "Frontend not healthy yet, retrying in 5 seconds... (${i+1}/3)"
-                                    sleep 5
-                                }
-                            }
-                            if (!frontendHealth) {
-                                error "❌ Frontend health check failed after multiple attempts."
                             }
                             echo "All services are healthy."
                         }
@@ -164,9 +163,9 @@ pipeline {
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
                 sh """
                     echo "--- Access Endpoints ---"
-                    echo "Frontend: http://localhost:${env.PROD_FRONTEND_PORT}"
-                    echo "Backend: http://localhost:${env.PROD_BACKEND_PORT}"
-                    echo "PgAdmin: http://localhost:${env.PGADMIN_PORT}"
+                    echo "Frontend: http://localhost:${env.REVERSE_PROXY_PORT}"
+                    echo "API: http://localhost:${env.REVERSE_PROXY_PORT}/api"
+                    echo "PgAdmin: http://localhost:${env.REVERSE_PROXY_PORT}/pgadmin"
                     echo "------------------------"
                 """
                 echo "Cleaning up .env file after successful deployment..."

@@ -1,5 +1,4 @@
 services:
-  # Common postgres configuration
   postgres:
     image: postgres:17.4-bookworm
     container_name: caravan-postgres
@@ -15,7 +14,6 @@ services:
     networks:
       - caravan-net
 
-  # Common backend configuration
   backend:
     build:
       context: ./backend
@@ -31,7 +29,6 @@ services:
     networks:
       - caravan-net
 
-  # Common pgadmin configuration
   pgadmin:
     image: dpage/pgadmin4
     container_name: caravan-pgadmin
@@ -40,14 +37,6 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     depends_on:
       - postgres
-    networks:
-      - caravan-net
-
-  # Common frontend configuration
-  frontend:
-    build:
-      context: ./frontend
-    container_name: caravan-react
     networks:
       - caravan-net
 
