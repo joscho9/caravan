@@ -28,7 +28,8 @@ pipeline {
                         'caravan-postgres-password',
                         'caravan-pgadmin-email',
                         'caravan-pgadmin-password',
-                        'caravan-api-url'
+                        'caravan-api-url',
+                        'caravan-reverse-proxy-port'
                     ]
 
                     def missing = []
@@ -56,7 +57,8 @@ pipeline {
                         string(credentialsId: 'caravan-postgres-password', variable: 'POSTGRES_PASSWORD'),
                         string(credentialsId: 'caravan-pgadmin-email', variable: 'PGADMIN_EMAIL'),
                         string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_PASSWORD'),
-                        string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL')
+                        string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL'),
+                        string(credentialsId: 'caravan-reverse-proxy-port', variable: 'REVERSE_PROXY_PORT')
                     ]) {
                         dir(pwd()) {
                             def envVars = """
@@ -70,7 +72,7 @@ pipeline {
                                 PGADMIN_PORT=${env.PGADMIN_PORT}
                                 FRONTEND_PORT=${env.FRONTEND_PORT}
                                 BACKEND_PORT=${env.BACKEND_PORT}
-                                REVERSE_PROXY_PORT=${env.REVERSE_PROXY_PORT}
+                                REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT}
                             """.stripIndent()
 
                             writeFile file: '.env', text: envVars
