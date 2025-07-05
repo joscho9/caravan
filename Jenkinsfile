@@ -41,9 +41,9 @@ pipeline {
                         }
                     }
                     if (!missing.isEmpty()) {
-                        error "🚨 Missing credentials: ${missing.join(', ')}. Please configure them in Jenkins."
+                        error "Missing credentials: ${missing.join(', ')}. Please configure them in Jenkins."
                     }
-                    echo "✅ All required credentials are present."
+                    echo "All required credentials are present."
                 }
             }
         }
@@ -75,10 +75,28 @@ pipeline {
                                 REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT}
                             """.stripIndent()
 
-                            writeFile file: '.env', text: envVars
-                            echo "Successfully created .env file in ${pwd()}/.env"
+                            // Create .env file safely without printing secrets
+                            sh '''
+                                cat > .env << 'EOF'
+                                POSTGRES_DB=''' + POSTGRES_DB + '''
+                                POSTGRES_USER=''' + POSTGRES_USER + '''
+                                POSTGRES_PASSWORD=''' + POSTGRES_PASSWORD + '''
+                                PGADMIN_DEFAULT_EMAIL=''' + PGADMIN_EMAIL + '''
+                                PGADMIN_DEFAULT_PASSWORD=''' + PGADMIN_PASSWORD + '''
+                                VITE_API_URL=''' + VITE_API_URL + '''
+                                POSTGRES_PORT=''' + env.POSTGRES_PORT + '''
+                                PGADMIN_PORT=''' + env.PGADMIN_PORT + '''
+                                FRONTEND_PORT=''' + env.FRONTEND_PORT + '''
+                                BACKEND_PORT=''' + env.BACKEND_PORT + '''
+                                REVERSE_PROXY_PORT=''' + REVERSE_PROXY_PORT + '''
+                                EOF
+                            '''
+                            echo ".env file created successfully"
 
-                            sh '[ -s .env ] || { echo "❌ .env file is empty or missing."; exit 1; }'
+                            sh '[ -s .env ] || { echo ".env file is empty or missing."; exit 1; }'
+                            
+                            // Set environment variable safely
+                            env.REVERSE_PROXY_PORT = REVERSE_PROXY_PORT
 
                             echo "Attempting to bring down existing containers and remove orphans AND VOLUMES..."
                             sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} down --remove-orphans --volumes || true"
@@ -94,44 +112,44 @@ pipeline {
                             sleep 40 // Adjusted from 20 to 40 seconds, might need more
 
                             echo "Verifying running containers..."
-                            sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
+                            sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps --format table"
 
-                            echo "🏥 Running Health Checks..."
+                            echo "Running Health Checks..."
                             def nginxHealth = false
                             def backendHealth = false
 
                             // Check Nginx Proxy (Frontend + API)
-                            for (int i = 0; i < 6; i++) {
+                            for (int i = 0; i < 3; i++) {
                                 try {
                                     sh "curl -sS --fail http://localhost:${env.REVERSE_PROXY_PORT} || true"
-                                    echo "✅ Nginx Proxy (Frontend) is healthy."
+                                    echo "Nginx Proxy (Frontend) is healthy."
                                     nginxHealth = true
                                     break
                                 } catch (Exception e) {
-                                    echo "Nginx Proxy not healthy yet, retrying in 10 seconds... (${i+1}/6)"
-                                    sleep 10
+                                    echo "Nginx Proxy not healthy yet, retrying in 5 seconds... (${i+1}/6)"
+                                    sleep 5
                                 }
                             }
                             if (!nginxHealth) {
-                                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs nginx-proxy || true"
-                                error "❌ Nginx Proxy health check failed after multiple attempts."
+                                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs nginx-proxy --tail=20 || true"
+                                error "Nginx Proxy health check failed after multiple attempts."
                             }
 
                             // Check Backend through Nginx Proxy
-                            for (int i = 0; i < 6; i++) {
+                            for (int i = 0; i < 3; i++) {
                                 try {
                                     sh "curl -sS --fail http://localhost:${env.REVERSE_PROXY_PORT}/api/actuator/health 2>&1 | grep '\"status\":\"UP\"'"
-                                    echo "✅ Backend (via Nginx Proxy) is healthy."
+                                    echo "Backend (via Nginx Proxy) is healthy."
                                     backendHealth = true
                                     break
                                 } catch (Exception e) {
-                                    echo "Backend not healthy yet, retrying in 10 seconds... (${i+1}/6)"
-                                    sleep 10
+                                    echo "Backend not healthy yet, retrying in 5 seconds... (${i+1}/6)"
+                                    sleep 5
                                 }
                             }
                             if (!backendHealth) {
-                                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs backend || true"
-                                error "❌ Backend health check failed after multiple attempts."
+                                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs backend --tail=20 || true"
+                                error "Backend health check failed after multiple attempts."
                             }
                             echo "All services are healthy."
                         }
@@ -152,8 +170,8 @@ pipeline {
             echo 'Gathering diagnostic information...'
             dir(pwd()) {
                 // The .env file will still be present here.
-                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps || true"
-                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs || true" // Get ALL logs for debugging
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps --format table || true"
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} logs --tail=50 || true" // Get recent logs for debugging
                 echo "Attempting to bring down services after failure..."
                 sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} down --remove-orphans --volumes || true"
                 // IMPORTANT: DO NOT remove .env here on failure. It helps with debugging the workspace.
@@ -162,7 +180,7 @@ pipeline {
         success {
             echo '✅ Deployment successful!'
             dir(pwd()) {
-                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps"
+                sh "set -a && . ./.env && docker compose -f ${env.COMPOSE_FILE} ps --format table"
                 sh """
                     echo "--- Access Endpoints ---"
                     echo "Frontend: http://localhost:${env.REVERSE_PROXY_PORT}"
