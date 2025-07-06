@@ -35,7 +35,6 @@ services:
     extends:
       file: docker-compose.common.yml
       service: pgadmin
-    # Remove external port - accessible through nginx-proxy at /pgadmin/
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 

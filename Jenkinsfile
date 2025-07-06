@@ -90,7 +90,7 @@ EOF
                             sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE up -d'
 
                             echo "Waiting for services to come online..."
-                            sleep 40
+                            sleep 15
 
                             echo "Verifying running containers..."
                             sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE ps --format table'
