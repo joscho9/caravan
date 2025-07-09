@@ -81,7 +81,7 @@ EOF
                             sh '[ -s .env ] || { echo ".env file is empty or missing."; exit 1; }'
 
                             echo "Stopping existing containers..."
-                            sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE down --remove-orphans --volumes || true'
+                            sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE down --remove-orphans || true'
 
                             echo "Building Docker images..."
                             sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE build --no-cache'
@@ -149,7 +149,7 @@ EOF
                 sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE ps --format table || true'
                 sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE logs --tail=50 || true'
                 echo "Attempting cleanup after failure..."
-                sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE down --remove-orphans --volumes || true'
+                sh 'set -a && . ./.env && docker compose -f $COMPOSE_FILE down --remove-orphans || true'
             }
         }
         success {
