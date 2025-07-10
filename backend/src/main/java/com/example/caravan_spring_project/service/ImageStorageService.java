@@ -72,10 +72,9 @@ public class ImageStorageService {
 
             ImageDimensions dimensions = getImageDimensions(destinationFile);
 
-            String relativePath = rootLocation.toAbsolutePath()
-                    .relativize(destinationFile)
-                    .toString()
-                    .replace("\\", "/");
+            String relativePath = destinationFile.getFileName().toString();
+            String caravanFolder = String.valueOf(caravanId);
+            relativePath = caravanFolder + "/" + relativePath;
 
             caravanService.addCaravanImage(
                     caravan,
