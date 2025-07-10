@@ -37,7 +37,7 @@ public class ImageStorageService {
         this.caravanService = caravanService;
     }
 
-    private final Path rootLocation = Paths.get("uploads");
+    private final Path rootLocation = Paths.get("/app/uploads");
 
     public String saveImage(MultipartFile file, UUID caravanId, String description) {
         Optional<Caravan> optionalCaravan = caravanRepository.findById(caravanId);
