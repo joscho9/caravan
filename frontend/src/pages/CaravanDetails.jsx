@@ -5,6 +5,8 @@ import CaravanSpecs from "../components/Caravan.jsx";
 import BookingForm from "../components/BookingForm.jsx";
 import CaravanDescription from "../components/CaravanDescription.jsx";
 import Header from "../components/Header.jsx";
+import Footer from "../components/Footer.jsx";
+
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
@@ -114,9 +116,7 @@ export default function CaravanDetail() {
                 </section>
             </main>
 
-            <footer>
-                {/* Fußzeile mit Impressum, AGBs etc. */}
-            </footer>
+            <Footer /> 
         </div>
     );
 }
