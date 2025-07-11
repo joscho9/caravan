@@ -35,6 +35,8 @@ services:
     extends:
       file: docker-compose.common.yml
       service: pgadmin
+    ports:
+      - "5050:80"  # Externer Port 5050 auf Container Port 80
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
