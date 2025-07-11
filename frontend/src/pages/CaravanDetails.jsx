@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import CaravanImageSection from "./CaravanImageSection.jsx";
-import CaravanSpecs from "./Caravan.jsx";
-import BookingForm from "./BookingForm.jsx";
-import CaravanDescription from "./CaravanDescription.jsx";
-import Header from "./Header.jsx";
+import CaravanImageSection from "../components/CaravanImageSection.jsx";
+import CaravanSpecs from "../components/Caravan.jsx";
+import BookingForm from "../components/BookingForm.jsx";
+import CaravanDescription from "../components/CaravanDescription.jsx";
+import Header from "../components/Header.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 

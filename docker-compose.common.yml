@@ -30,7 +30,7 @@ services:
       - caravan-net
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:9.5
     container_name: caravan-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}

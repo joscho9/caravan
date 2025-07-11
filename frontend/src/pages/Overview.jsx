@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import Header from "./Header.jsx";
+import Header from "../components/Header.jsx";
+import Footer from "../components/Footer.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -24,7 +25,7 @@ export default function CaravanList() {
     if (loading) return <p>Loading...</p>;
 
     return (
-        <>
+        <div id="root">
         <Header />
         <section className="overview-container">
             {caravans.map(caravan => {
@@ -48,6 +49,7 @@ export default function CaravanList() {
                 </div>
             )})}
         </section>
-        </>
+        <Footer />
+        </div>
     );
 }

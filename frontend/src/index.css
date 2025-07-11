@@ -26,6 +26,12 @@ main {
   padding: 0 8px;
 }
 
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .left_main_column{
   flex-basis: 60%;
   flex-grow: 0;
@@ -47,7 +53,6 @@ aside {
 }
 
 h1 {
-  color: whitesmoke;
   font-size: 1.5em;
   margin-bottom: 0.5em;
 }
@@ -185,6 +190,7 @@ tr:nth-child(even){
   max-width: 1200px; /* Eine sinnvolle maximale Breite festlegen */
   margin: 0 auto; /* Zentriert den Container selbst */
   padding: 0 1rem; /* Fügt etwas Abstand an den Seiten hinzu */
+  flex:1;
 }
 
 footer {
@@ -202,6 +208,7 @@ footer {
   width: 300px;
   position: relative;
   overflow: hidden;
+  max-height: 300px;
 }
 
 .caravan-tile img {
@@ -276,4 +283,61 @@ button.year-custom[type=button]{
   font-weight: bold;
   position: absolute;
   left: 0;
+}
+
+.footer {
+  background-color: #f7f7f7;
+  border-top: 1px solid #ddd;
+  padding: 2rem 1rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.footer-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.footer-text {
+  color: #555;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+  color: #666;
+  margin: 0 0.5rem;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: #000;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.impressum-content {
+  flex: 1;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.impressum-content h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.impressum-content h2 {
+  margin-top: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.impressum-content p {
+  line-height: 1.6;
 }
