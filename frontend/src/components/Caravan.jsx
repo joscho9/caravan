@@ -38,7 +38,7 @@ export default function CaravanSpecs({ caravan }) {
                 </tr>
                 <tr>
                     <td>Anzahl der Schlafplätze</td>
-                    <td>{caravan.schlafplaetze || "Nicht verfügbar"}</td>
+                    <td>{caravan.anzahlSchlafplaetze || "Nicht verfügbar"}</td>
                 </tr>
                 </tbody>
             </table>
