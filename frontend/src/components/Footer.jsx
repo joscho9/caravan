@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         <p className="footer-text">
-          © {new Date().getFullYear()} Dein Firmenname. Alle Rechte vorbehalten.
+          © {new Date().getFullYear()} Wohnwagenvermietung Uwe Scholz. Alle Rechte vorbehalten.
         </p>
         <div className="footer-links">
           <a href="/impressum">Impressum</a>
