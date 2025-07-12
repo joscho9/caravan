@@ -32,7 +32,8 @@ pipeline {
                         'caravan-reverse-proxy-port',
                         'caravan-mail-username',
                         'caravan-mail-password',
-                        'caravan-admin-email'
+                        'caravan-admin-email',
+                        'caravan-admin-email-secondary'
                     ]
 
                     def missing = []
@@ -64,7 +65,8 @@ pipeline {
                         string(credentialsId: 'caravan-reverse-proxy-port', variable: 'REVERSE_PROXY_PORT'),
                         string(credentialsId: 'caravan-mail-username', variable: 'MAIL_USERNAME'),
                         string(credentialsId: 'caravan-mail-password', variable: 'MAIL_PASSWORD'),
-                        string(credentialsId: 'caravan-admin-email', variable: 'ADMIN_EMAIL')
+                        string(credentialsId: 'caravan-admin-email', variable: 'ADMIN_EMAIL'),
+                        string(credentialsId: 'caravan-admin-email-secondary', variable: 'ADMIN_EMAIL_SECONDARY')
                     ]) {
                         dir(pwd()) {
                             sh '''
@@ -83,6 +85,7 @@ REVERSE_PROXY_PORT=$REVERSE_PROXY_PORT
 MAIL_USERNAME=$MAIL_USERNAME
 MAIL_PASSWORD=$MAIL_PASSWORD
 ADMIN_EMAIL=$ADMIN_EMAIL
+ADMIN_EMAIL_SECONDARY=$ADMIN_EMAIL_SECONDARY
 EOF
                             '''
                             echo ".env file created successfully"

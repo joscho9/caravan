@@ -20,24 +20,35 @@ public class EmailService {
     @Value("${admin.email}")
     private String adminEmail;
     
+    @Value("${admin.email.secondary}")
+    private String adminEmailSecondary;
+    
     public void sendContactNotification(ContactMessageDTO contactMessage) {
         logger.info("Starting email notification process for contact message from: {}", contactMessage.getEmail());
         
+        // Send to primary admin email
+        sendEmailToRecipient(contactMessage, adminEmail, "primary admin");
+        
+        // Send to secondary admin email
+        sendEmailToRecipient(contactMessage, adminEmailSecondary, "secondary admin");
+    }
+    
+    private void sendEmailToRecipient(ContactMessageDTO contactMessage, String recipientEmail, String recipientType) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(adminEmail);
+        message.setTo(recipientEmail);
         message.setSubject("Neue Kontaktnachricht: " + contactMessage.getSubject());
         message.setText(createEmailContent(contactMessage));
         
-        logger.debug("Email message prepared - To: {}, Subject: {}", adminEmail, message.getSubject());
+        logger.debug("Email message prepared - To: {} ({}), Subject: {}", recipientEmail, recipientType, message.getSubject());
         
         try {
-            logger.info("Attempting to send email notification to admin: {}", adminEmail);
+            logger.info("Attempting to send email notification to {}: {}", recipientType, recipientEmail);
             mailSender.send(message);
-            logger.info("Email notification sent successfully to admin: {}", adminEmail);
+            logger.info("Email notification sent successfully to {}: {}", recipientType, recipientEmail);
         } catch (Exception e) {
-            logger.error("Failed to send email notification to admin: {}. Error: {}", adminEmail, e.getMessage(), e);
+            logger.error("Failed to send email notification to {}: {}. Error: {}", recipientType, recipientEmail, e.getMessage(), e);
             // Log the error but don't throw it to avoid breaking the contact form
-            System.err.println("Failed to send email notification: " + e.getMessage());
+            System.err.println("Failed to send email notification to " + recipientType + ": " + e.getMessage());
         }
     }
     
