@@ -1,6 +1,8 @@
 package com.example.caravan_spring_project.service;
 
 import com.example.caravan_spring_project.dto.ContactMessageDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
     
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+    
     @Autowired
     private JavaMailSender mailSender;
     
@@ -17,14 +21,21 @@ public class EmailService {
     private String adminEmail;
     
     public void sendContactNotification(ContactMessageDTO contactMessage) {
+        logger.info("Starting email notification process for contact message from: {}", contactMessage.getEmail());
+        
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(adminEmail);
         message.setSubject("Neue Kontaktnachricht: " + contactMessage.getSubject());
         message.setText(createEmailContent(contactMessage));
         
+        logger.debug("Email message prepared - To: {}, Subject: {}", adminEmail, message.getSubject());
+        
         try {
+            logger.info("Attempting to send email notification to admin: {}", adminEmail);
             mailSender.send(message);
+            logger.info("Email notification sent successfully to admin: {}", adminEmail);
         } catch (Exception e) {
+            logger.error("Failed to send email notification to admin: {}. Error: {}", adminEmail, e.getMessage(), e);
             // Log the error but don't throw it to avoid breaking the contact form
             System.err.println("Failed to send email notification: " + e.getMessage());
         }
