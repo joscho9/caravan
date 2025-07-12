@@ -32,7 +32,7 @@ public class CaravanController {
     public List<CaravanDTO> getAllCaravans() {
         logger.info("GET /caravans/all called");
         List<Caravan> caravans = caravanService.getAllCaravans();
-        logger.info("Cravans retrieved: {}", caravans.size());
+        logger.info("Caravans retrieved: {}", caravans.size());
         return caravans.stream()
                 .map(caravanDTOMapper::mapCaravan)
                 .toList();
