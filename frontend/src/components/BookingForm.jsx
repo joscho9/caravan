@@ -75,7 +75,7 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                             onClickDate: (self, event) => {
                                 handleOnDateClick(self);
                             },
-                            locale: 'de-AT',
+                            locale: 'de-DE',
                             selectionDatesMode: 'multiple-ranged',
                             dateMin: new Date(),
                             dateMax: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
