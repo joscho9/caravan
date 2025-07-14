@@ -6,6 +6,7 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
     const [showPopup, setShowPopup] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [location, setLocation] = useState('hainburg-63512-de');
 
     // Format date helper function
     const formatDate = (date) => {
@@ -86,8 +87,9 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
 
                 <div>
                     <label htmlFor="standort">Standort</label>
-                    <select id="standort" name="standort">
+                    <select id="standort" name="standort" value={location} onChange={e => setLocation(e.target.value)}>
                         <option value="hainburg-63512-de">Hainburg 63512, DE (Lieferung)</option>
+                        <option value="koeln-51147-de">Köln 51147, DE (Lieferung)</option>
                     </select>
                 </div>
 
@@ -119,7 +121,7 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                         startDate: startDate,
                         endDate: endDate,
                         totalPrice: bookingDetails?.totalPrice,
-                        location: 'Hainburg 63512, DE'
+                        location: location
                     }}
                 />
             )}

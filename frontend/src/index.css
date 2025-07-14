@@ -6,11 +6,6 @@
 
 body {
   font-family: "Inter", sans-serif;
-  /*background-color: #f8f5e6; !* Helle Cremefarbe *!*/
-  /* oder */
-  /*background-color: #fffcf2; !* Elfenbein *!*/
-  /* oder */
-  /*background-color: #fdfbf7; !* Sanfte Cremefarbe *!*/
 }
 
 header {
@@ -92,6 +87,7 @@ h1 {
   object-fit: cover;
   margin-bottom: 8px;
 }
+
 #right_col_section{
   flex-basis:30%;
 }
@@ -112,7 +108,6 @@ h1 {
   border-radius: 5px;
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
 }
-
 
 label {
   display: block;
@@ -137,16 +132,7 @@ select {
   border: 1px solid #ccc;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-}
-
-.hairline {
+ .hairline {
   border-width: 0.1px;
   border-style: solid;
   border-color: rgba(51,51,51,0.4);
@@ -218,6 +204,7 @@ footer {
   object-fit: cover;
 
 }
+
 .caravan-tile:hover img{
   transition: transform 200ms ease;
   transform: scale(1.01);
@@ -231,21 +218,13 @@ footer {
   bottom: 0;
   backdrop-filter: blur(3px);
 }
+
 .caravan-info h3 {
   color:white;
   margin: 0;
   font-size: 1.3em;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5); /* Schatten hinzufügen */
 
-}
-button.month-custom[type=button]{
-  color: #007bff;
-  pointer-events: none;
-  margin-right: 8px;
-}
-button.year-custom[type=button]{
-  color: #007bff;
-  pointer-events: none;
 }
 
 .features-section {
@@ -401,14 +380,11 @@ button.year-custom[type=button]{
 }
 
 .submit-btn {
-  background-color: #007bff;
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  margin-top: 1rem;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -436,4 +412,203 @@ button.year-custom[type=button]{
   border-radius: 4px;
   margin-top: 1rem;
   border: 1px solid #f5c6cb;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.popup-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.popup-content h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.popup-content label {
+  display: block;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.popup-content input,
+.popup-content textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  box-sizing: border-box;
+}
+.popup-content textarea {
+  min-height: 10rem;
+}
+
+button {
+  min-height: 40px;
+  background-color: #007bff;
+  color: white;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.popup-buttons button {
+
+  flex: 1 1 0;
+
+
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #c0392b;
+}
+
+/* X-Close Button */
+.close-x {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.7rem;
+  color: #888;
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.2s;
+}
+
+.close-x:hover {
+  color: #e74c3c;
+}
+
+.booking-summary {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #007bff;
+}
+
+.booking-summary h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.booking-summary p {
+  margin: 0.5rem 0;
+  color: #555;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  border: 1px solid #c3e6cb;
+  text-align: center;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  border: 1px solid #f5c6cb;
+  text-align: center;
+}
+
+.popup-overlay p{
+  padding:0px;
+}
+
+
+.markdown-description h2,
+.markdown-description h3 {
+    font-weight: bold;
+    margin-top: 1.2rem;
+}
+
+.markdown-description ul {
+    padding-left: 1.2rem;
+    list-style-type: disc;
+}
+
+.markdown-description li {
+    margin-bottom: 0.3rem;
 }

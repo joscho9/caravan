@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./BookingPopup.css";
+import "../index.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -73,15 +73,22 @@ Preis pro Tag: ${bookingData?.caravan?.price_per_day ? bookingData.caravan.price
 
     return (
         <div className="popup-overlay">
-            <div className="popup-content">
+            <div className="popup-content" style={{ position: 'relative' }}>
+                <button className="close-x" onClick={onClose} aria-label="Schließen">×</button>
                 <h2>Buchungsanfrage</h2>
                 
                 {bookingData && (
                     <div className="booking-summary">
-                        <h3>Ihre Auswahl:</h3>
-                        <p><strong>Wohnwagen:</strong> {bookingData.caravan?.name}</p>
+                        <p><strong>Wohnwagen:</strong> {bookingData.caravan?.wohnwagentyp}</p>
                         <p><strong>Startdatum:</strong> {bookingData.startDate}</p>
                         <p><strong>Enddatum:</strong> {bookingData.endDate}</p>
+                        <p><strong>Standort:</strong> {
+                            bookingData.location === 'hainburg-63512-de'
+                                ? 'Hainburg 63512, DE (Lieferung)'
+                                : bookingData.location === 'koeln-51147-de'
+                                    ? 'Köln 51147, DE (Lieferung)'
+                                    : bookingData.location
+                        }</p>
                         <p><strong>Gesamtpreis:</strong> {bookingData.totalPrice ? bookingData.totalPrice.toFixed(2) + '€' : 'Nicht berechnet'}</p>
                     </div>
                 )}
@@ -145,7 +152,7 @@ Preis pro Tag: ${bookingData?.caravan?.price_per_day ? bookingData.caravan.price
                         >
                             {isSubmitting ? 'Wird gesendet...' : 'Buchungsanfrage senden'}
                         </button>
-                        <button type="button" onClick={onClose}>
+                        <button type="button" className="cancel-btn" onClick={onClose}>
                             Abbrechen
                         </button>
                     </div>

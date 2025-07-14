@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import './CaravanDescription.css';
+import '../index.css';
 
 export default function CaravanDescription({ description }) {
     return (
