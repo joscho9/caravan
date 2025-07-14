@@ -15,18 +15,18 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
     };
 
     // Handle date selection from calendar
-    const handleDatesSelected = (calendarInstance) => {
+    const handleOnDateClick = (calendarInstance) => {
 
         console.log(calendarInstance.context.selectedDates);
 
         try {
             // Access selected dates based on the calendar API
             const selectedDates = calendarInstance.context.selectedDates;
-
-            console.log("Selected dates:", selectedDates);
+            console.log("Selected dates Barilla:", selectedDates);
 
 
             if (selectedDates && selectedDates.length > 1) {
+
                 // Sort dates to ensure correct order
                 const sortedDates = [...selectedDates].sort((a, b) => new Date(a) - new Date(b));
 
@@ -48,6 +48,9 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                     });
                 }
             }
+            if(selectedDates && selectedDates.length == 1){
+                setStartDate(formatDate(selectedDates[0]));
+            }
         } catch (error) {
             console.error("Error processing selected dates:", error);
         }
@@ -58,22 +61,9 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
             <form onSubmit={onSubmit}>
                 <div>
                     <label htmlFor="startdatum">Startdatum</label>
-                    <input
-                        type="date"
-                        id="startdatum"
-                        name="startdatum"
-                        readOnly
-                        value={startDate || ''}
-                    />
-
+                    <input type="date" id="startdatum" name="startdatum" readOnly value={startDate || ''}/>
                     <label htmlFor="enddatum">Enddatum</label>
-                    <input
-                        type="date"
-                        id="enddatum"
-                        name="enddatum"
-                        readOnly
-                        value={endDate || ''}
-                    />
+                    <input type="date" id="enddatum" name="enddatum" readOnly value={endDate || ''}/>
                 </div>
 
                 <div className="calendar-wrapper">
@@ -82,13 +72,14 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                         pricePerDay={caravan.price_per_day || 0}
                         config={{
                             onClickDate: (self, event) => {
-                                handleDatesSelected(self);
+                                handleOnDateClick(self);
                             },
                             locale: 'de-AT',
                             selectionDatesMode: 'multiple-ranged',
                             dateMin: new Date(),
                             dateMax: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
                             disableDates: caravan.unavailableDates || [],
+                            disableDatesGaps: true,
                         }}
                     />
                 </div>
@@ -120,7 +111,18 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                     </button>
                 </div>
             </form>
-            {showPopup && <BookingPopup onClose={() => setShowPopup(false)} />}
+            {showPopup && (
+                <BookingPopup 
+                    onClose={() => setShowPopup(false)} 
+                    bookingData={{
+                        caravan: caravan,
+                        startDate: startDate,
+                        endDate: endDate,
+                        totalPrice: bookingDetails?.totalPrice,
+                        location: 'Hainburg 63512, DE'
+                    }}
+                />
+            )}
         </div>
     );
 }

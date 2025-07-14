@@ -41,6 +41,8 @@ export default function CaravanDetail() {
     }, [id]);
 
     const handleDatesSelected = (startDate, endDate, totalPrice) => {
+        console.log("Aurora Borealis");
+        
         setBookingDetails({
             startDate,
             endDate,
