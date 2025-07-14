@@ -31,7 +31,8 @@ public class ContactMessageService {
             dto.getName(),
             dto.getEmail(),
             dto.getSubject(),
-            dto.getMessage()
+            dto.getMessage(),
+            dto.getCaravanName()
         );
         
         logger.debug("Saving contact message to database...");
@@ -86,7 +87,8 @@ public class ContactMessageService {
             message.getEmail(),
             message.getSubject(),
             message.getMessage(),
-            message.getCreatedAt()
+            message.getCreatedAt(),
+            message.getCaravanName()
         );
     }
 } 

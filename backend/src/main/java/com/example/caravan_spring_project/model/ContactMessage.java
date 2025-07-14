@@ -23,6 +23,9 @@ public class ContactMessage {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
     
+    @Column(name = "caravan_name")
+    private String caravanName;
+    
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
@@ -32,11 +35,12 @@ public class ContactMessage {
     }
     
     // Constructor with fields
-    public ContactMessage(String name, String email, String subject, String message) {
+    public ContactMessage(String name, String email, String subject, String message, String caravanName) {
         this.name = name;
         this.email = email;
         this.subject = subject;
         this.message = message;
+        this.caravanName = caravanName;
         this.createdAt = LocalDateTime.now();
     }
     
@@ -79,6 +83,13 @@ public class ContactMessage {
     
     public void setMessage(String message) {
         this.message = message;
+    }
+    
+    public String getCaravanName() {
+        return caravanName;
+    }
+    public void setCaravanName(String caravanName) {
+        this.caravanName = caravanName;
     }
     
     public LocalDateTime getCreatedAt() {

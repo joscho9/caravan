@@ -10,26 +10,29 @@ public class ContactMessageDTO {
     private String subject;
     private String message;
     private LocalDateTime createdAt;
+    private String caravanName;
     
     // Default constructor
     public ContactMessageDTO() {}
     
     // Constructor with all fields
-    public ContactMessageDTO(Long id, String name, String email, String subject, String message, LocalDateTime createdAt) {
+    public ContactMessageDTO(Long id, String name, String email, String subject, String message, LocalDateTime createdAt, String caravanName) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.subject = subject;
         this.message = message;
         this.createdAt = createdAt;
+        this.caravanName = caravanName;
     }
     
     // Constructor for creating new messages (without id)
-    public ContactMessageDTO(String name, String email, String subject, String message) {
+    public ContactMessageDTO(String name, String email, String subject, String message, String caravanName) {
         this.name = name;
         this.email = email;
         this.subject = subject;
         this.message = message;
+        this.caravanName = caravanName;
     }
     
     // Getters and Setters
@@ -79,5 +82,12 @@ public class ContactMessageDTO {
     
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getCaravanName() {
+        return caravanName;
+    }
+    public void setCaravanName(String caravanName) {
+        this.caravanName = caravanName;
     }
 } 

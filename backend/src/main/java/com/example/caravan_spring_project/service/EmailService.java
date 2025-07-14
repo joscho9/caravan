@@ -59,9 +59,9 @@ public class EmailService {
         content.append("Name: ").append(contactMessage.getName()).append("\n");
         content.append("E-Mail: ").append(contactMessage.getEmail()).append("\n");
         content.append("Betreff: ").append(contactMessage.getSubject()).append("\n");
+        content.append("Wohnwagen: ").append(contactMessage.getCaravanName()).append("\n");
         content.append("Nachricht:\n").append(contactMessage.getMessage()).append("\n\n");
         content.append("Zeitstempel: ").append(contactMessage.getCreatedAt()).append("\n");
-        
         return content.toString();
     }
 } 
