@@ -8,19 +8,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/caravans")
 public class CaravanController {
 
-    CaravanService caravanService;
-    CaravanDTOMapper caravanDTOMapper;
+    private final CaravanService caravanService;
+    private final CaravanDTOMapper caravanDTOMapper;
     private static final Logger logger = LoggerFactory.getLogger(CaravanController.class);
 
     public CaravanController(CaravanService caravanService, CaravanDTOMapper caravanDTOMapper) {
@@ -28,9 +26,10 @@ public class CaravanController {
         this.caravanDTOMapper = caravanDTOMapper;
     }
 
-    @GetMapping("/all")
+    // GET /api/caravans - Get all caravans
+    @GetMapping
     public List<CaravanDTO> getAllCaravans() {
-        logger.info("GET /caravans/all called");
+        logger.info("GET /caravans called");
         List<Caravan> caravans = caravanService.getAllCaravans();
         logger.info("Caravans retrieved: {}", caravans.size());
         return caravans.stream()
@@ -38,24 +37,36 @@ public class CaravanController {
                 .toList();
     }
 
-    @PostMapping("/add")
-    public Caravan addCaravan(Caravan caravan) {
-        logger.info("POST /add called with data : {}", caravan);
-        return caravanService.saveCaravan(caravan);
-    }
-
-    @PostMapping("/add-list")
-    public List<Caravan> addCaravans(@RequestBody List<Caravan> caravans) {
-        return caravanService.saveCaravans(caravans);
-    }
-
+    // GET /api/caravans/{id} - Get caravan by ID
     @GetMapping("/{id}")
-    public Caravan getCaravan(@PathVariable UUID id) {
+    public ResponseEntity<Caravan> getCaravan(@PathVariable UUID id) {
         logger.info("GET /caravans/{} called", id);
-        return caravanService.getCaravanById(id);
+        Caravan caravan = caravanService.getCaravanById(id);
+        if (caravan != null) {
+            return ResponseEntity.ok(caravan);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
-    @PutMapping("/update/{id}")
+    // POST /api/caravans - Create new caravan
+    @PostMapping
+    public ResponseEntity<Caravan> createCaravan(@RequestBody Caravan caravan) {
+        logger.info("POST /caravans called with data: {}", caravan);
+        Caravan savedCaravan = caravanService.saveCaravan(caravan);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCaravan);
+    }
+
+    // POST /api/caravans/batch - Create multiple caravans
+    @PostMapping("/batch")
+    public ResponseEntity<List<Caravan>> createCaravans(@RequestBody List<Caravan> caravans) {
+        logger.info("POST /caravans/batch called with {} caravans", caravans.size());
+        List<Caravan> savedCaravans = caravanService.saveCaravans(caravans);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCaravans);
+    }
+
+    // PUT /api/caravans/{id} - Update caravan
+    @PutMapping("/{id}")
     public ResponseEntity<Caravan> updateCaravan(@PathVariable UUID id, @RequestBody Caravan caravan){
         logger.info("PUT /caravans/{} called", id);
         Caravan updatedCaravan = caravanService.updateCaravan(id, caravan);
@@ -67,41 +78,32 @@ public class CaravanController {
         }
     }
 
-    @PostMapping("/delete")
-    public void deleteCaravan(UUID id) {
+    // DELETE /api/caravans/{id} - Delete caravan
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCaravan(@PathVariable UUID id) {
+        logger.info("DELETE /caravans/{} called", id);
         caravanService.deleteCaravan(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/reset-database")
-    public ResponseEntity<String> resetDatabase(@RequestHeader("X-Admin-Token") String token) {
-        logger.info("DELETE /caravans/reset-database called");
-        if (!Objects.equals(token, "supersecret123")) {
-            logger.error("invalid token provided");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("invalid token");
-        }
-
-        caravanService.resetDatabase();
-        return ResponseEntity.ok("Datenbank wurde erfolgreich zurückgesetzt.");
-    }
-
-    @PostMapping("/set-main-image")
+    // PATCH /api/caravans/{id}/main-image - Set main image for caravan
+    @PatchMapping("/{id}/main-image")
     public ResponseEntity<String> setMainImage(
-            @RequestParam UUID id,
+            @PathVariable UUID id,
             @RequestParam String imageId){
-        logger.info("POST /caravans/set-main-image called");
+        logger.info("PATCH /caravans/{}/main-image called", id);
 
-        Caravan caravan =  caravanService.getCaravanById(id);
+        Caravan caravan = caravanService.getCaravanById(id);
 
         if(caravan == null){
             logger.warn("Caravan id {} not found", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Caravan id " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Caravan not found");
         }
 
         caravan.setMainImagePath(imageId);
         caravanService.saveCaravan(caravan);
 
         logger.info("MainImagePath set for Caravan: {}", caravan.getMainImagePath());
-        return ResponseEntity.ok("MainImagePath set for Caravan");
+        return ResponseEntity.ok("Main image updated successfully");
     }
-
 }

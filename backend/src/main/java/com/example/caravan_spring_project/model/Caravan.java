@@ -27,8 +27,8 @@ public class Caravan {
     @Column(name = "main_image_path", nullable = true)
     private String mainImagePath;
 
-    @Column(name = "wohnwagentyp", nullable = false)
-    private String wohnwagentyp;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Column(name = "anzahl_schlafplaetze", nullable = false)
     private String anzahlSchlafplaetze;

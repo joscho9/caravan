@@ -12,7 +12,7 @@ public class CaravanDTO {
         private UUID id;
         private Long userId;
         private String mainImagePath;
-        private String wohnwagentyp;
+        private String name;
         private String anzahlSchlafplaetze;
         private String gesamtlaenge;
         private String nutzlaenge;

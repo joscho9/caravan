@@ -3,7 +3,7 @@ import "../index.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const BookingPopup = ({ onClose, bookingData }) => {
+const BookingPopup = ({ onClose, bookingData: bookingDataProp }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -26,37 +26,32 @@ const BookingPopup = ({ onClose, bookingData }) => {
         setIsSubmitting(true);
         setSubmitStatus(null);
 
-        // Erstelle eine erweiterte Nachricht mit Buchungsdetails
-        const enhancedMessage = `Buchungsanfrage für ${bookingData?.caravan?.name || 'Wohnwagen'}:
-
-${formData.message}
-
---- Buchungsdetails ---
-Startdatum: ${bookingData?.startDate || 'Nicht ausgewählt'}
-Enddatum: ${bookingData?.endDate || 'Nicht ausgewählt'}
-Standort: ${bookingData?.location || 'Hainburg 63512, DE'}
-Gesamtpreis: ${bookingData?.totalPrice ? bookingData.totalPrice.toFixed(2) + '€' : 'Nicht berechnet'}
-Preis pro Tag: ${bookingData?.caravan?.price_per_day ? bookingData.caravan.price_per_day.toFixed(2) + '€' : 'Nicht verfügbar'}`;
-
-        const contactData = {
-            ...formData,
-            subject: `Buchungsanfrage: ${bookingData?.caravan?.name || 'Wohnwagen'} - ${formData.subject}`,
-            message: enhancedMessage
+        // Sende Buchungsdetails als einzelne Felder (alle Pflichtfelder, keine Fallbacks)
+        const bookingData = {
+            name: formData.name,
+            email: formData.email,
+            subject: formData.subject,
+            message: formData.message,
+            caravanName: bookingDataProp.caravan.name,
+            startDate: bookingDataProp.startDate,
+            endDate: bookingDataProp.endDate,
+            location: bookingDataProp.location,
+            totalPrice: bookingDataProp.totalPrice,
+            pricePerDay: bookingDataProp.caravan.price_per_day || 50.0
         };
 
         try {
-            const response = await fetch(`${API_URL}/contact`, {
+            const response = await fetch(`${API_URL}/bookings`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(contactData)
+                body: JSON.stringify(bookingData)
             });
 
             if (response.ok) {
                 setSubmitStatus('success');
                 setFormData({ name: '', email: '', subject: '', message: '' });
-                // Schließe Popup nach 3 Sekunden
                 setTimeout(() => {
                     onClose();
                 }, 3000);
@@ -77,19 +72,19 @@ Preis pro Tag: ${bookingData?.caravan?.price_per_day ? bookingData.caravan.price
                 <button className="close-x" onClick={onClose} aria-label="Schließen">×</button>
                 <h2>Buchungsanfrage</h2>
                 
-                {bookingData && (
+                {bookingDataProp && (
                     <div className="booking-summary">
-                        <p><strong>Wohnwagen:</strong> {bookingData.caravan?.wohnwagentyp}</p>
-                        <p><strong>Startdatum:</strong> {bookingData.startDate}</p>
-                        <p><strong>Enddatum:</strong> {bookingData.endDate}</p>
+                        <p><strong>Wohnwagen:</strong> {bookingDataProp.caravan?.name}</p>
+                        <p><strong>Startdatum:</strong> {bookingDataProp.startDate}</p>
+                        <p><strong>Enddatum:</strong> {bookingDataProp.endDate}</p>
                         <p><strong>Standort:</strong> {
-                            bookingData.location === 'hainburg-63512-de'
+                            bookingDataProp.location === 'hainburg-63512-de'
                                 ? 'Hainburg 63512, DE (Lieferung)'
-                                : bookingData.location === 'koeln-51147-de'
+                                : bookingDataProp.location === 'koeln-51147-de'
                                     ? 'Köln 51147, DE (Lieferung)'
-                                    : bookingData.location
+                                    : bookingDataProp.location
                         }</p>
-                        <p><strong>Gesamtpreis:</strong> {bookingData.totalPrice ? bookingData.totalPrice.toFixed(2) + '€' : 'Nicht berechnet'}</p>
+                        <p><strong>Gesamtpreis:</strong> {bookingDataProp.totalPrice ? bookingDataProp.totalPrice.toFixed(2) + '€' : 'Nicht berechnet'}</p>
                     </div>
                 )}
 

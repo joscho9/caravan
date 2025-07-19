@@ -23,7 +23,7 @@ public class CaravanDTOMapper {
         dto.setId(caravan.getId());
         dto.setUserId(caravan.getUserId());
         dto.setMainImagePath(caravan.getMainImagePath());
-        dto.setWohnwagentyp(caravan.getWohnwagentyp());
+        dto.setName(caravan.getName());
         dto.setAnzahlSchlafplaetze(caravan.getAnzahlSchlafplaetze());
         dto.setGesamtlaenge(caravan.getGesamtlaenge());
         dto.setNutzlaenge(caravan.getNutzlaenge());

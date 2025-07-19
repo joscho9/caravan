@@ -10,7 +10,7 @@ export default function CaravanList() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${API_URL}/caravans/all`)
+        fetch(`${API_URL}/caravans`)
             .then(response => response.json())
             .then(data => {
                 setCaravans(data);
@@ -40,10 +40,10 @@ export default function CaravanList() {
                         <img
                             // todo remove src={`${API_URL}/uploads/${caravan.images && caravan.images[0] && caravan.images[0].imagePath}`}
                             src={`${API_URL}/uploads/${caravan.id}/${caravan.mainImagePath}`}
-                            alt={caravan.wohnwagentyp}
+                            alt={caravan.name}
                         />
                         <div className="caravan-info">
-                            <h3>{caravan.wohnwagentyp}</h3>
+                            <h3>{caravan.name}</h3>
                         </div>
                     </a>
                 </div>

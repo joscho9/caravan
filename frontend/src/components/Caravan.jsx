@@ -6,7 +6,7 @@ export default function CaravanSpecs({ caravan }) {
                 <tbody>
                 <tr>
                     <td>Wohnwagentyp</td>
-                    <td>{caravan.wohnwagentyp || "Nicht verfügbar"}</td>
+                    <td>{caravan.name || "Nicht verfügbar"}</td>
                 </tr>
                 <tr>
                     <td>Gesamtlänge</td>

@@ -86,7 +86,7 @@ export default function CaravanDetail() {
                 <section id="left_main_column">
                     <article>
                         <CaravanImageSection caravan={caravan} caravanId={id} />
-                        <h2>{caravan.wohnwagentyp}</h2>
+                        <h2>{caravan.name}</h2>
                     </article>
                     <div className="hairline"></div>
                     <CaravanSpecs caravan={caravan} />

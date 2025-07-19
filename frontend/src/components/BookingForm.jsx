@@ -40,13 +40,27 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                 setStartDate(formattedStartDate);
                 setEndDate(formattedEndDate);
 
+                // Calculate total price - calculate days between start and end date
+                const startDateObj = new Date(sortedDates[0]);
+                const endDateObj = new Date(sortedDates[sortedDates.length - 1]);
+                const timeDifference = endDateObj.getTime() - startDateObj.getTime();
+                const numberOfDays = Math.ceil(timeDifference / (1000 * 3600 * 24)) + 1; // +1 to include both start and end day
+                const pricePerDay = caravan.price_per_day || 50.0;
+                const totalPrice = numberOfDays * pricePerDay;
+                
+                console.log("Price calculation debug:", {
+                    selectedDatesArray: sortedDates,
+                    selectedDatesCount: sortedDates.length,
+                    startDate: sortedDates[0],
+                    endDate: sortedDates[sortedDates.length - 1],
+                    calculatedDays: numberOfDays,
+                    pricePerDay: pricePerDay,
+                    totalPrice: totalPrice
+                });
+
                 // Call parent callback if needed
                 if (onDatesSelected) {
-                    onDatesSelected({
-                        startDate: sortedDates[0],
-                        endDate: sortedDates[sortedDates.length - 1],
-                        selectedDates: sortedDates
-                    });
+                    onDatesSelected(formattedStartDate, formattedEndDate, totalPrice);
                 }
             }
             if(selectedDates && selectedDates.length == 1){
@@ -70,7 +84,7 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                 <div className="calendar-wrapper">
                     <h4>Verfügbare Tage auswählen:</h4>
                     <VanillaCalendar
-                        pricePerDay={caravan.price_per_day || 0}
+                        pricePerDay={caravan.price_per_day || 50.0}
                         config={{
                             onClickDate: (self, event) => {
                                 handleOnDateClick(self);
@@ -94,7 +108,7 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                 </div>
 
                 <div className="price-summary">
-                    <p>Standard-Tag: <span>{caravan.price_per_day?.toFixed(2)}€</span></p>
+                    <p>Standard-Tag: <span>{(caravan.price_per_day || 50.0).toFixed(2)}€</span></p>
                     <p className="font-semibold">Gesamtsumme: <span id="total-price">
                         {bookingDetails?.totalPrice ? bookingDetails.totalPrice.toFixed(2) + "€" : "(Datum auswählen)"}
                     </span></p>
