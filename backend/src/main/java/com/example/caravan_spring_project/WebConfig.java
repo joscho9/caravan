@@ -10,12 +10,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // Development
+        // registry.addMapping("/**")
+        //         .allowedOriginPatterns("*")
+        //         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        //         .allowedHeaders("*")
+        //         .allowCredentials(true);
+        
+        // Production
         registry.addMapping("/**").allowedOrigins(
             "http://localhost",
-            "http://localhost:5173",           // Für lokale Entwicklung
+            "http://localhost:5173",          
             "http://localhost:3000",
-            "http://frontend:3000",            // Für Container-Kommunikation
-            "http://my-react-container:3000",  // Alternativ Container-Name
+            "http://frontend:3000",        
+            "http://my-react-container:3000", 
             "https://wohnwagenvermietung-niederkassel.de",
             "https://www.wohnwagenvermietung-niederkassel.de",
             "https://wohnwagenvermietung-frankfurt.de",
@@ -26,7 +34,7 @@ public class WebConfig implements WebMvcConfigurer {
             "https://www.wohnwagenvermietung-aschaffenburg.de",
             "https://wohnwagenvermietung-hainburg.de"
             )
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }

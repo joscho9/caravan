@@ -83,17 +83,10 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
     };
 
     return (
-        <div className="glowing-box">
+        <div className="booking-form-wrapper">
             <form onSubmit={onSubmit}>
-                <div>
-                    <label htmlFor="startdatum">Startdatum</label>
-                    <input type="date" id="startdatum" name="startdatum" readOnly value={startDate || ''}/>
-                    <label htmlFor="enddatum">Enddatum</label>
-                    <input type="date" id="enddatum" name="enddatum" readOnly value={endDate || ''}/>
-                </div>
-
                 <div className="calendar-wrapper">
-                    <h4>Verfügbare Tage auswählen:</h4>
+                    <h4 style={{ textAlign: 'center' }}>Wählen Sie Ihren gewünschten Zeitraum im Kalender aus</h4>
                     <VanillaCalendar
                         summerPrice={caravan.summerPrice}
                         winterPrice={caravan.winterPrice}
@@ -107,6 +100,45 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                             dateMax: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
                             disableDates: caravan.unavailableDates || [],
                             disableDatesGaps: true,
+                            selectedTheme: 'light',
+                        }}
+                    />
+                    <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                        Nicht verfügbare Tage sind ausgegraut und können nicht ausgewählt werden.
+                    </p>
+                </div>
+
+                <div>
+                    <label style={{ pointerEvents: 'none', cursor: 'default' }}>Startdatum</label>
+                    <input 
+                        type="text" 
+                        id="startdatum" 
+                        name="startdatum" 
+                        readOnly 
+                        value={startDate || ''}
+                        placeholder="Bitte im Kalender auswählen..."
+                        style={{ 
+                            pointerEvents: 'none', 
+                            cursor: 'default',
+                            width: 'calc(100% - 20px)',
+                            maxWidth: 'calc(100% - 20px)',
+                            boxSizing: 'border-box'
+                        }}
+                    />
+                    <label style={{ pointerEvents: 'none', cursor: 'default' }}>Enddatum</label>
+                    <input 
+                        type="text" 
+                        id="enddatum" 
+                        name="enddatum" 
+                        readOnly 
+                        value={endDate || ''}
+                        placeholder="Bitte im Kalender auswählen..."
+                        style={{ 
+                            pointerEvents: 'none', 
+                            cursor: 'default',
+                            width: 'calc(100% - 20px)',
+                            maxWidth: 'calc(100% - 20px)',
+                            boxSizing: 'border-box'
                         }}
                     />
                 </div>
