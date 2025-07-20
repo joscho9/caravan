@@ -88,6 +88,17 @@ export default function CaravanDetail() {
                         <CaravanImageSection caravan={caravan} caravanId={id} />
                         <h2>{caravan.name}</h2>
                     </article>
+                    
+                    {/* Booking form appears here on mobile after the heading */}
+                    <section id="right_col_section">
+                        <BookingForm
+                            caravan={caravan}
+                            bookingDetails={bookingDetails}
+                            onDatesSelected={handleDatesSelected}
+                            onSubmit={handleSubmit}
+                        />
+                    </section>
+                    
                     <div className="hairline"></div>
                     <CaravanSpecs caravan={caravan} />
                     <div className="hairline"></div>
@@ -106,15 +117,6 @@ export default function CaravanDetail() {
 
                     <div className="hairline"></div>
                     <CaravanDescription description={caravan.description} />
-                </section>
-
-                <section id="right_col_section">
-                    <BookingForm
-                        caravan={caravan}
-                        bookingDetails={bookingDetails}
-                        onDatesSelected={handleDatesSelected}
-                        onSubmit={handleSubmit}
-                    />
                 </section>
             </main>
 

@@ -21,6 +21,49 @@ main {
   padding: 0 8px;
 }
 
+/* CaravanDetails Layout */
+#left_main_column {
+  flex: 1;
+  position: relative;
+}
+
+#right_col_section {
+  position: absolute;
+  top: 0;
+  right: -370px;
+  width: 350px;
+  z-index: 10;
+}
+
+/* Responsive Design für CaravanDetails */
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+    padding: 0 16px;
+  }
+  
+  #left_main_column {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+  
+  #right_col_section {
+    position: static;
+    width: 100%;
+    margin: 20px 0;
+    order: 0; /* Appears in normal document flow after heading */
+  }
+}
+
+/* Desktop: Ensure main has enough space for the sidebar */
+@media (min-width: 769px) {
+  main {
+    max-width: 1000px; /* Keep original max-width */
+    margin: 20px auto;
+    padding-right: 370px; /* Make space for the absolute positioned booking form */
+  }
+}
+
 #root {
   display: flex;
   flex-direction: column;
@@ -325,9 +368,43 @@ footer {
 .kontakt-content {
   flex: 1;
   max-width: 800px;
-  min-width: 600px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
+/* Responsive Design für Kontaktformular */
+@media (max-width: 768px) {
+  .kontakt-content {
+    width: 95%;
+    margin: 10px auto;
+    padding: 0 8px;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+/* Desktop Design für Kontaktformular */
+@media (min-width: 769px) {
+  .kontakt-content {
+    width: 500px;
+    margin: 20px auto;
+    padding: 0 16px;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    padding: 12px;
+    font-size: 16px;
+  }
 }
 
 .kontakt-content h1 {
