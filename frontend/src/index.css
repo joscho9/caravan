@@ -613,3 +613,31 @@ button {
 .markdown-description li {
     margin-bottom: 0.3rem;
 }
+/* Booking Button Styles */
+.booking-button {
+  margin-top: 20px;
+}
+
+.booking-button button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  width: 100%;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.booking-button button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.booking-button button:disabled {
+  background-color: #6c757d;
+  color: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
