@@ -99,8 +99,8 @@ public class EmailService {
         content.append("Startdatum: ").append(booking.getStartDate()).append("\n");
         content.append("Enddatum: ").append(booking.getEndDate()).append("\n");
         content.append("Standort: ").append(booking.getLocation()).append("\n");
-        content.append("Gesamtpreis: ").append(booking.getTotalPrice()).append("\n");
-        content.append("Preis pro Tag: ").append(booking.getPricePerDay()).append("\n");
+        content.append("Gesamtpreis: ").append(booking.getTotalPrice()).append(" €\n");
+        content.append("Preis pro Tag: ").append(booking.getPricePerDay()).append(" €\n");
         content.append("Nachricht:\n").append(booking.getMessage()).append("\n\n");
         content.append("Zeitstempel: ").append(booking.getCreatedAt()).append("\n");
         return content.toString();

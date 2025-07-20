@@ -37,7 +37,7 @@ const BookingPopup = ({ onClose, bookingData: bookingDataProp }) => {
             endDate: bookingDataProp.endDate,
             location: bookingDataProp.location,
             totalPrice: bookingDataProp.totalPrice,
-            pricePerDay: bookingDataProp.caravan.price_per_day || 50.0
+            pricePerDay: bookingDataProp.totalPrice / ((new Date(bookingDataProp.endDate) - new Date(bookingDataProp.startDate)) / (1000 * 60 * 60 * 24) + 1)
         };
 
         try {

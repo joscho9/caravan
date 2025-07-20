@@ -57,6 +57,12 @@ public class Caravan {
     @Column(name = "uebergabepauschale", nullable = false)
     private String uebergabepauschale;
 
+    @Column(name = "summer_price", nullable = false)
+    private Double summerPrice;
+
+    @Column(name = "winter_price", nullable = false)
+    private Double winterPrice;
+
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
@@ -77,4 +83,22 @@ public class Caravan {
     @Column(name = "description")
     @Lob
     private String description;
+    
+    // Utility method to get current price based on date
+    public Double getCurrentPrice() {
+        return getCurrentPriceForDate(LocalDate.now());
+    }
+    
+    public Double getCurrentPriceForDate(LocalDate date) {
+        int month = date.getMonthValue();
+        int day = date.getDayOfMonth();
+        
+        // Summer season: April 1st to August 31st (04-01 to 08-31)
+        // Winter season: September 1st to March 31st (09-01 to 03-31)
+        if ((month >= 4 && month <= 8) || (month == 9 && day == 1)) {
+            return this.summerPrice;
+        } else {
+            return this.winterPrice;
+        }
+    }
 }
