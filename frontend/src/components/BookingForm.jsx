@@ -55,6 +55,11 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
                 
+                // Add handover fee
+                if (caravan.handoverFee) {
+                    totalPrice += caravan.handoverFee;
+                }
+                
                 const timeDifference = endDateObj.getTime() - startDateObj.getTime();
                 const numberOfDays = Math.ceil(timeDifference / (1000 * 3600 * 24)) + 1;
                 
@@ -154,6 +159,7 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                 <div className="price-summary">
                     <p>Sommer (Apr-Aug): <span>{caravan.summerPrice?.toFixed(2)}€</span></p>
                     <p>Winter (Sep-Mär): <span>{caravan.winterPrice?.toFixed(2)}€</span></p>
+                    <p>Übergabepauschale: <span>{caravan.handoverFee?.toFixed(2)}€</span></p>
                     <p className="font-semibold">Gesamtsumme: <span id="total-price">
                         {bookingDetails?.totalPrice ? bookingDetails.totalPrice.toFixed(2) + "€" : "(Datum auswählen)"}
                     </span></p>

@@ -55,7 +55,7 @@ public class Caravan {
     private String hoechstgeschwindigkeit;
 
     @Column(name = "uebergabepauschale", nullable = false)
-    private String uebergabepauschale;
+    private Double handoverFee;
 
     @Column(name = "summer_price", nullable = false)
     private Double summerPrice;

@@ -32,7 +32,7 @@ public class CaravanDTOMapper {
         dto.setZulaessigesGesamtgewicht(caravan.getZulaessigesGesamtgewicht());
         dto.setKupplungstyp(caravan.getKupplungstyp());
         dto.setHoechstgeschwindigkeit(caravan.getHoechstgeschwindigkeit());
-        dto.setUebergabepauschale(caravan.getUebergabepauschale());
+        dto.setHandoverFee(caravan.getHandoverFee());
         dto.setSummerPrice(caravan.getSummerPrice());
         dto.setWinterPrice(caravan.getWinterPrice());
         dto.setImages(mapCaravanImages(caravan.getImages()));

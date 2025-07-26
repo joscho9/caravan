@@ -21,7 +21,7 @@ public class CaravanDTO {
         private String zulaessigesGesamtgewicht;
         private String kupplungstyp;
         private String hoechstgeschwindigkeit;
-        private String uebergabepauschale;
+        private Double handoverFee;
         private Double summerPrice;
         private Double winterPrice;
         private List<CaravanImageDTO> images; // DTOs für CaravanImages
