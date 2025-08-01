@@ -24,7 +24,7 @@ public class EmailService {
     @Value("${admin.email.secondary}")
     private String adminEmailSecondary;
     
-    @Value("${VITE_API_URL:http://localhost:8080}")
+    @Value("${EMAIL_BASE_URL:${VITE_API_URL:http://localhost:8080}}")
     private String baseUrl;
     
     public void sendContactNotification(ContactMessageDTO contactMessage) {
@@ -61,7 +61,6 @@ public class EmailService {
         content.append("Name: ").append(contactMessage.getName()).append("\n");
         content.append("E-Mail: ").append(contactMessage.getEmail()).append("\n");
         content.append("Betreff: ").append(contactMessage.getSubject()).append("\n");
-        content.append("Wohnwagen: ").append(contactMessage.getCaravanName()).append("\n");
         content.append("Nachricht:\n").append(contactMessage.getMessage()).append("\n\n");
         content.append("Zeitstempel: ").append(contactMessage.getCreatedAt()).append("\n");
         return content.toString();

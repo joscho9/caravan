@@ -29,6 +29,7 @@ pipeline {
                         'caravan-pgadmin-email',
                         'caravan-pgadmin-password',
                         'caravan-api-url',
+                        'caravan-email-base-url',
                         'caravan-reverse-proxy-port',
                         'caravan-mail-username',
                         'caravan-mail-password',
@@ -62,6 +63,7 @@ pipeline {
                         string(credentialsId: 'caravan-pgadmin-email', variable: 'PGADMIN_EMAIL'),
                         string(credentialsId: 'caravan-pgadmin-password', variable: 'PGADMIN_PASSWORD'),
                         string(credentialsId: 'caravan-api-url', variable: 'VITE_API_URL'),
+                        string(credentialsId: 'caravan-email-base-url', variable: 'EMAIL_BASE_URL'),
                         string(credentialsId: 'caravan-reverse-proxy-port', variable: 'REVERSE_PROXY_PORT'),
                         string(credentialsId: 'caravan-mail-username', variable: 'MAIL_USERNAME'),
                         string(credentialsId: 'caravan-mail-password', variable: 'MAIL_PASSWORD'),
@@ -77,6 +79,7 @@ POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 PGADMIN_DEFAULT_EMAIL=$PGADMIN_EMAIL
 PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD
 VITE_API_URL=$VITE_API_URL
+EMAIL_BASE_URL=$EMAIL_BASE_URL
 POSTGRES_PORT=$POSTGRES_PORT
 PGADMIN_PORT=$PGADMIN_PORT
 FRONTEND_PORT=$FRONTEND_PORT

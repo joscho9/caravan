@@ -33,8 +33,9 @@ services:
       # Admin emails
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_EMAIL_SECONDARY: ${ADMIN_EMAIL_SECONDARY}
-      # Server base URL for email links (reuse VITE_API_URL)
+      # Server base URL for email links
       VITE_API_URL: ${VITE_API_URL}
+      EMAIL_BASE_URL: ${EMAIL_BASE_URL:-${VITE_API_URL}}
     depends_on:
       postgres:
         condition: service_healthy
