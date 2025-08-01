@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buchung bestätigt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .detail-item {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="success">✅ Buchung erfolgreich bestätigt!</h2>
+        <p>Die Termine wurden automatisch für den Wohnwagen gesperrt.</p>
+        
+        <div class="details">
+            <div class="detail-item"><strong>Wohnwagen:</strong> {{caravanName}}</div>
+            <div class="detail-item"><strong>Zeitraum:</strong> {{startDate}} bis {{endDate}}</div>
+            <div class="detail-item"><strong>Kunde:</strong> {{customerName}}</div>
+            <div class="detail-item"><strong>E-Mail:</strong> {{customerEmail}}</div>
+        </div>
+        
+        <p style="color: #6c757d; font-size: 14px;">
+            Diese Buchung ist nun bestätigt und die Termine sind im System gesperrt.
+        </p>
+    </div>
+</body>
+</html>

@@ -24,6 +24,9 @@ public class EmailService {
     @Value("${admin.email.secondary}")
     private String adminEmailSecondary;
     
+    @Value("${VITE_API_URL:http://localhost:8080}")
+    private String baseUrl;
+    
     public void sendContactNotification(ContactMessageDTO contactMessage) {
         logger.info("Starting email notification process for contact message from: {}", contactMessage.getEmail());
         
@@ -90,7 +93,7 @@ public class EmailService {
 
     private String createBookingEmailContent(BookingDTO booking) {
         StringBuilder content = new StringBuilder();
-        content.append("Eine neue Buchungsanfrage wurde über das Buchungsformular gesendet.\n\n");
+        content.append("Eine neue Buchungsanfrage wurde ueber das Buchungsformular gesendet.\n\n");
         content.append("Details:\n");
         content.append("Name: ").append(booking.getName()).append("\n");
         content.append("E-Mail: ").append(booking.getEmail()).append("\n");
@@ -99,10 +102,18 @@ public class EmailService {
         content.append("Startdatum: ").append(booking.getStartDate()).append("\n");
         content.append("Enddatum: ").append(booking.getEndDate()).append("\n");
         content.append("Standort: ").append(booking.getLocation()).append("\n");
-        content.append("Gesamtpreis: ").append(booking.getTotalPrice()).append(" €\n");
-        content.append("Preis pro Tag: ").append(booking.getPricePerDay()).append(" €\n");
+        content.append("Gesamtpreis: ").append(booking.getTotalPrice()).append(" Euro\n");
         content.append("Nachricht:\n").append(booking.getMessage()).append("\n\n");
-        content.append("Zeitstempel: ").append(booking.getCreatedAt()).append("\n");
+        content.append("Zeitstempel: ").append(booking.getCreatedAt()).append("\n\n");
+        
+        // Add confirmation/rejection links
+        content.append("=== BUCHUNG BEARBEITEN ===\n\n");
+        content.append("Buchung BESTAETIGEN (Termine werden automatisch gesperrt):\n");
+        content.append(baseUrl).append("/bookings/confirm/").append(booking.getConfirmationToken()).append("\n\n");
+        content.append("Buchung ABLEHNEN:\n");
+        content.append(baseUrl).append("/bookings/reject/").append(booking.getConfirmationToken()).append("\n\n");
+        content.append("WICHTIG: Jeder Link kann nur einmal verwendet werden!\n");
+        
         return content.toString();
     }
 } 

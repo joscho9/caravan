@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fehler bei Buchungsbearbeitung</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        .error-details {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="error">❌ Fehler</h2>
+        <p>{{errorMessage}}</p>
+        
+        <div class="error-details">
+            <p><strong>Mögliche Ursachen:</strong></p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>Der Link wurde bereits verwendet</li>
+                <li>Der Link ist ungültig oder abgelaufen</li>
+                <li>Die Buchung wurde bereits bearbeitet</li>
+            </ul>
+        </div>
+        
+        <p style="color: #6c757d; font-size: 14px;">
+            Bei Fragen wenden Sie sich bitte an den Administrator.
+        </p>
+    </div>
+</body>
+</html>

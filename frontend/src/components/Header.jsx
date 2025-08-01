@@ -8,6 +8,7 @@ export default function Header() {
                 <Link to="/" className="header-link">Zurück zur Übersicht</Link>
                 <h1 className="header-title">Wohnwagenvermietung</h1>
                 <p className="header-subtitle">Dein Abenteuer beginnt hier.</p>
+                <Link to="/willkommen" className="welcome-button">Mehr über uns erfahren</Link>
             </div>
         </header>
     );

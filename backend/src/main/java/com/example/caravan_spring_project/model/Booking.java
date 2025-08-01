@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "bookings")
@@ -24,6 +25,8 @@ public class Booking {
     private String message;
     @Column(nullable = false)
     private String caravanName;
+    @Column(name = "caravan_id")
+    private UUID caravanId;
     @Column(nullable = false)
     private LocalDate startDate;
     @Column(nullable = false)
@@ -36,9 +39,13 @@ public class Booking {
     private Double pricePerDay;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+    @Column(nullable = false)
+    private String status = "PENDING"; // PENDING, CONFIRMED, REJECTED
+    @Column(name = "confirmation_token", unique = true)
+    private String confirmationToken;
     
     public Booking(Long id, String name, String email, String subject, String message, 
-                   String caravanName, LocalDate startDate, LocalDate endDate, 
+                   String caravanName, UUID caravanId, LocalDate startDate, LocalDate endDate, 
                    String location, Double totalPrice, Double pricePerDay) {
         this.id = id;
         this.name = name;
@@ -46,11 +53,14 @@ public class Booking {
         this.subject = subject;
         this.message = message;
         this.caravanName = caravanName;
+        this.caravanId = caravanId;
         this.startDate = startDate;
         this.endDate = endDate;
         this.location = location;
         this.totalPrice = totalPrice;
         this.pricePerDay = pricePerDay;
+        this.status = "PENDING";
+        this.confirmationToken = UUID.randomUUID().toString();
         // createdAt will be set by @PrePersist
     }
 

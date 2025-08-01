@@ -3,6 +3,15 @@ import "../index.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Helper function to get location display name
+const getLocationDisplayName = (locationValue) => {
+    const locationMap = {
+        'hainburg-63512-de': 'Hainburg 63512, DE',
+        'koeln-51147-de': 'Köln 51147, DE'
+    };
+    return locationMap[locationValue] || locationValue;
+};
+
 const BookingPopup = ({ onClose, bookingData: bookingDataProp }) => {
     const [formData, setFormData] = useState({
         name: '',
@@ -26,13 +35,13 @@ const BookingPopup = ({ onClose, bookingData: bookingDataProp }) => {
         setIsSubmitting(true);
         setSubmitStatus(null);
 
-        // Sende Buchungsdetails als einzelne Felder (alle Pflichtfelder, keine Fallbacks)
         const bookingData = {
             name: formData.name,
             email: formData.email,
             subject: formData.subject,
             message: formData.message,
             caravanName: bookingDataProp.caravan.name,
+            caravanId: bookingDataProp.caravan.id,
             startDate: bookingDataProp.startDate,
             endDate: bookingDataProp.endDate,
             location: bookingDataProp.location,
@@ -77,13 +86,7 @@ const BookingPopup = ({ onClose, bookingData: bookingDataProp }) => {
                         <p><strong>Wohnwagen:</strong> {bookingDataProp.caravan?.name}</p>
                         <p><strong>Startdatum:</strong> {bookingDataProp.startDate}</p>
                         <p><strong>Enddatum:</strong> {bookingDataProp.endDate}</p>
-                        <p><strong>Standort:</strong> {
-                            bookingDataProp.location === 'hainburg-63512-de'
-                                ? 'Hainburg 63512, DE (Lieferung)'
-                                : bookingDataProp.location === 'koeln-51147-de'
-                                    ? 'Köln 51147, DE (Lieferung)'
-                                    : bookingDataProp.location
-                        }</p>
+                        <p><strong>Standort:</strong> {getLocationDisplayName(bookingDataProp.location)}</p>
                         <p><strong>Gesamtpreis:</strong> {bookingDataProp.totalPrice ? bookingDataProp.totalPrice.toFixed(2) + '€' : 'Nicht berechnet'}</p>
                     </div>
                 )}

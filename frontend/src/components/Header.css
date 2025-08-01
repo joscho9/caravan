@@ -53,3 +53,22 @@
     margin-top: 0.5rem;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
+
+.welcome-button {
+    margin-top: 1rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-button:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}

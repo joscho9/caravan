@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -16,10 +17,13 @@ public class BookingDTO {
     private String subject;
     private String message;
     private String caravanName;
+    private UUID caravanId;
     private LocalDate startDate;
     private LocalDate endDate;
     private String location;
     private Double totalPrice;
     private Double pricePerDay;
     private LocalDateTime createdAt;
+    private String status; // PENDING, CONFIRMED, REJECTED
+    private String confirmationToken;
 } 

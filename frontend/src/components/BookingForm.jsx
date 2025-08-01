@@ -151,8 +151,8 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                 <div>
                     <label htmlFor="standort">Standort</label>
                     <select id="standort" name="standort" value={location} onChange={e => setLocation(e.target.value)}>
-                        <option value="hainburg-63512-de">Hainburg 63512, DE (Lieferung)</option>
-                        <option value="koeln-51147-de">Köln 51147, DE (Lieferung)</option>
+                        <option value="hainburg-63512-de">Hainburg 63512, DE</option>
+                        <option value="koeln-51147-de">Köln 51147, DE</option>
                     </select>
                 </div>
 
