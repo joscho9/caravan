@@ -14,16 +14,12 @@ export default function VanillaCalendar({ config, ...attributes }: CalendarProps
 
     useEffect(() => {
         if (!ref.current) return;
-        setCalendar(new Calendar(ref.current, config));
-        console.log("hooki hook");
-        
+        setCalendar(new Calendar(ref.current, config));        
     }, []) 
 
     useEffect(() => {
         if (!calendar) return;
         calendar.init()
-        console.log("Pro Arbeit");
-
     }, [calendar]) 
 
     return (

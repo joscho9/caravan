@@ -50,31 +50,6 @@ export default function CaravanDetail() {
         });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Here you would handle the booking submission
-        console.log("Booking details:", bookingDetails);
-
-        // Example: Send booking data to your API
-        // fetch('http://localhost:8080/api/bookings', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //         caravanId: id,
-        //         startDate: bookingDetails.startDate,
-        //         endDate: bookingDetails.endDate,
-        //         totalPrice: bookingDetails.totalPrice
-        //     })
-        // })
-        // .then(response => response.json())
-        // .then(data => {
-        //     // Handle success - maybe redirect to confirmation page
-        // })
-        // .catch(error => {
-        //     // Handle error
-        // });
-    };
-
     if (loading) return <p>Lädt...</p>;
     if (error) return <p>Fehler: {error}</p>;
     if (!caravan) return <p>Kein Caravan gefunden</p>;
@@ -89,13 +64,11 @@ export default function CaravanDetail() {
                         <h2>{caravan.name}</h2>
                     </article>
                     
-                    {/* Booking form appears here on mobile after the heading */}
                     <section id="right_col_section">
                         <BookingForm
                             caravan={caravan}
                             bookingDetails={bookingDetails}
                             onDatesSelected={handleDatesSelected}
-                            onSubmit={handleSubmit}
                         />
                     </section>
                     
@@ -103,7 +76,6 @@ export default function CaravanDetail() {
                     <CaravanSpecs caravan={caravan} />
                     <div className="hairline"></div>
 
-                    {/* Neue Ausstattungsliste */}
                     {caravan.ausstattungsmerkmale && caravan.ausstattungsmerkmale.length > 0 && (
                         <section className="features-section">
                             <h3>Die wichtigsten Ausstattungsmerkmale</h3>
@@ -114,12 +86,10 @@ export default function CaravanDetail() {
                             </ul>
                         </section>
                     )}
-
                     <div className="hairline"></div>
                     <CaravanDescription description={caravan.description} />
                 </section>
             </main>
-
             <Footer /> 
         </div>
     );

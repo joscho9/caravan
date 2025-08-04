@@ -2,7 +2,7 @@ import VanillaCalendar from "./Calendar.tsx";
 import BookingPopup from "./BookingPopup.jsx";
 import {useState, useEffect} from "react";
 
-export default function BookingForm({ caravan, bookingDetails, onDatesSelected, onSubmit }) {
+export default function BookingForm({ caravan, bookingDetails, onDatesSelected}) {
     const [showPopup, setShowPopup] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -18,13 +18,11 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
     // Handle date selection from calendar
     const handleOnDateClick = (calendarInstance) => {
 
-        console.log(calendarInstance.context.selectedDates);
+        //console.log(calendarInstance.context.selectedDates);
 
         try {
             // Access selected dates based on the calendar API
             const selectedDates = calendarInstance.context.selectedDates;
-            console.log("Selected dates Barilla:", selectedDates);
-
 
             if (selectedDates && selectedDates.length > 1) {
 
@@ -62,17 +60,6 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
                 
                 const timeDifference = endDateObj.getTime() - startDateObj.getTime();
                 const numberOfDays = Math.ceil(timeDifference / (1000 * 3600 * 24)) + 1;
-                
-                console.log("Price calculation debug:", {
-                    selectedDatesArray: sortedDates,
-                    selectedDatesCount: sortedDates.length,
-                    startDate: sortedDates[0],
-                    endDate: sortedDates[sortedDates.length - 1],
-                    calculatedDays: numberOfDays,
-                    summerPrice: caravan.summerPrice,
-                    winterPrice: caravan.winterPrice,
-                    totalPrice: totalPrice
-                });
 
                 // Call parent callback if needed
                 if (onDatesSelected) {
@@ -89,95 +76,91 @@ export default function BookingForm({ caravan, bookingDetails, onDatesSelected, 
 
     return (
         <div className="booking-form-wrapper">
-            <form onSubmit={onSubmit}>
-                <div className="calendar-wrapper">
-                    <h4 style={{ textAlign: 'center' }}>Wählen Sie Ihren gewünschten Zeitraum im Kalender aus</h4>
-                    <VanillaCalendar
-                        summerPrice={caravan.summerPrice}
-                        winterPrice={caravan.winterPrice}
-                        config={{
-                            onClickDate: (self, event) => {
-                                handleOnDateClick(self);
-                            },
-                            locale: 'de-DE',
-                            selectionDatesMode: 'multiple-ranged',
-                            dateMin: new Date(),
-                            dateMax: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-                            disableDates: caravan.unavailableDates || [],
-                            disableDatesGaps: true,
-                            selectedTheme: 'light',
-                        }}
-                    />
-                    <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
-                        Nicht verfügbare Tage sind ausgegraut und können nicht ausgewählt werden.
-                    </p>
-                </div>
+            <div className="calendar-wrapper">
+                <h4 style={{ textAlign: 'center' }}>Wählen Sie Ihren gewünschten Zeitraum im Kalender aus</h4>
+                <VanillaCalendar
+                    config={{
+                        onClickDate: (self, event) => {
+                            handleOnDateClick(self);
+                        },
+                        locale: 'de-DE',
+                        selectionDatesMode: 'multiple-ranged',
+                        dateMin: new Date(),
+                        dateMax: new Date(new Date(new Date("12-31-1900").setFullYear(new Date().getFullYear()+2))),
+                        disableDates: caravan.unavailableDates || [],
+                        disableDatesGaps: true,
+                        selectedTheme: 'light',
+                    }}
+                />
+                <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                    Nicht verfügbare Tage sind ausgegraut und können nicht ausgewählt werden.
+                </p>
+            </div>
 
-                <div>
-                    <label style={{ pointerEvents: 'none', cursor: 'default' }}>Startdatum</label>
-                    <input 
-                        type="text" 
-                        id="startdatum" 
-                        name="startdatum" 
-                        readOnly 
-                        value={startDate || ''}
-                        placeholder="Bitte im Kalender auswählen..."
-                        style={{ 
-                            pointerEvents: 'none', 
-                            cursor: 'default',
-                            width: 'calc(100% - 20px)',
-                            maxWidth: 'calc(100% - 20px)',
-                            boxSizing: 'border-box'
-                        }}
-                    />
-                    <label style={{ pointerEvents: 'none', cursor: 'default' }}>Enddatum</label>
-                    <input 
-                        type="text" 
-                        id="enddatum" 
-                        name="enddatum" 
-                        readOnly 
-                        value={endDate || ''}
-                        placeholder="Bitte im Kalender auswählen..."
-                        style={{ 
-                            pointerEvents: 'none', 
-                            cursor: 'default',
-                            width: 'calc(100% - 20px)',
-                            maxWidth: 'calc(100% - 20px)',
-                            boxSizing: 'border-box'
-                        }}
-                    />
-                </div>
+            <div>
+                <label style={{ pointerEvents: 'none', cursor: 'default' }}>Startdatum</label>
+                <input 
+                    type="text" 
+                    id="startdatum" 
+                    name="startdatum" 
+                    readOnly 
+                    value={startDate || ''}
+                    placeholder="Bitte im Kalender auswählen..."
+                    style={{ 
+                        pointerEvents: 'none', 
+                        cursor: 'default',
+                        width: 'calc(100% - 20px)',
+                        maxWidth: 'calc(100% - 20px)',
+                        boxSizing: 'border-box'
+                    }}
+                />
+                <label style={{ pointerEvents: 'none', cursor: 'default' }}>Enddatum</label>
+                <input 
+                    type="text" 
+                    id="enddatum" 
+                    name="enddatum" 
+                    readOnly 
+                    value={endDate || ''}
+                    placeholder="Bitte im Kalender auswählen..."
+                    style={{ 
+                        pointerEvents: 'none', 
+                        cursor: 'default',
+                        width: 'calc(100% - 20px)',
+                        maxWidth: 'calc(100% - 20px)',
+                        boxSizing: 'border-box'
+                    }}
+                />
+            </div>
 
-                <div>
-                    <label htmlFor="standort">Standort</label>
-                    <select id="standort" name="standort" value={location} onChange={e => setLocation(e.target.value)}>
-                        <option value="hainburg-63512-de">Hainburg 63512, DE</option>
-                        <option value="koeln-51147-de">Köln 51147, DE</option>
-                    </select>
-                </div>
+            <div>
+                <label htmlFor="standort">Standort</label>
+                <select id="standort" name="standort" value={location} onChange={e => setLocation(e.target.value)}>
+                    <option value="hainburg-63512-de">Hainburg 63512, DE</option>
+                    <option value="koeln-51147-de">Köln 51147, DE</option>
+                </select>
+            </div>
 
-                <div className="price-summary">
-                    <p>Sommer (Apr-Aug): <span>{caravan.summerPrice?.toFixed(2)}€</span></p>
-                    <p>Winter (Sep-Mär): <span>{caravan.winterPrice?.toFixed(2)}€</span></p>
-                    <p>Übergabepauschale: <span>{caravan.handoverFee?.toFixed(2)}€</span></p>
-                    <p className="font-semibold">Gesamtsumme: <span id="total-price">
-                        {bookingDetails?.totalPrice ? bookingDetails.totalPrice.toFixed(2) + "€" : "(Datum auswählen)"}
-                    </span></p>
-                </div>
+            <div className="price-summary">
+                <p>Sommer (Apr-Aug): <span>{caravan.summerPrice?.toFixed(2)}€</span></p>
+                <p>Winter (Sep-Mär): <span>{caravan.winterPrice?.toFixed(2)}€</span></p>
+                <p>Übergabepauschale: <span>{caravan.handoverFee?.toFixed(2)}€</span></p>
+                <p className="font-semibold">Gesamtsumme: <span id="total-price">
+                    {bookingDetails?.totalPrice ? bookingDetails.totalPrice.toFixed(2) + "€" : "(Datum auswählen)"}
+                </span></p>
+            </div>
 
-                <div className="booking-button">
-                    <button
-                        type="button"
-                        disabled={!startDate || !endDate}
-                        onClick={() => {
-                            console.log("Booking details:", {startDate, endDate, bookingDetails});
-                            setShowPopup(true);
-                        }}
-                    >
-                        Jetzt anfragen
-                    </button>
-                </div>
-            </form>
+            <div className="booking-button">
+                <button
+                    type="button"
+                    disabled={!startDate || !endDate}
+                    onClick={() => {
+                        console.log("Booking details:", {startDate, endDate, bookingDetails});
+                        setShowPopup(true);
+                    }}
+                >
+                    Jetzt anfragen
+                </button>
+            </div>
             {showPopup && (
                 <BookingPopup 
                     onClose={() => setShowPopup(false)} 
